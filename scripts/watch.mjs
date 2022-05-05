@@ -59,8 +59,11 @@ function watchPreload(server) {
 }
 
 // bootstrap
-const server = await createServer({ configFile: 'packages/renderer/vite.config.ts' })
-
-await server.listen()
-await watchPreload(server)
-await watchMain(server)
+(async () => {
+  const server = await createServer({configFile: 'packages/renderer/vite.config.ts'})
+  await server.listen()
+  await watchPreload(server)
+  await watchMain(server)
+})()
+//
+// bootstrap()

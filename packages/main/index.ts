@@ -1,8 +1,6 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
-import './samples/electron-store'
-import './samples/npm-esm-packages'
 
 // Disable GPU Acceleration for Windows 7
 if (release().startsWith('6.1')) app.disableHardwareAcceleration()
@@ -14,32 +12,37 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
 let win: BrowserWindow | null = null
 
 async function createWindow() {
   win = new BrowserWindow({
-    width: 1800,
-    height: 1000,
-    title: 'Main window',
+    width: 1024,
+    height: 768,
+    titleBarStyle: 'hidden',
+    darkTheme: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs')
+      preload: join(__dirname, '../preload/index.cjs'),
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   })
 
   if (app.isPackaged) {
     win.loadFile(join(__dirname, '../renderer/index.html'))
+    win.webContents.openDevTools()
   } else {
     // 🚧 Use ['ENV_NAME'] avoid vite:define plugin
     const url = `http://${process.env['VITE_DEV_SERVER_HOST']}:${process.env['VITE_DEV_SERVER_PORT']}`
 
     win.loadURL(url)
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
   }
 
   // Test active push message to Renderer-process
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    win?.webContents.send('main-process-message', new Date().toLocaleString())
   })
 
   // Make all links open with the browser, not with the application
@@ -71,4 +74,24 @@ app.on('activate', () => {
   } else {
     createWindow()
   }
+
+})
+
+ipcMain.on('min', function (event) {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  // @ts-ignore
+  win.minimize()
+})
+ipcMain.on('max', function (event) {
+  const win: any = BrowserWindow.fromWebContents(event.sender)
+  if (win.isMaximized()) {
+    win.unmaximize()
+  } else {
+    win.maximize()
+  }
+})
+ipcMain.on('close', function (event) {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  // @ts-ignore
+  win.close()
 })

@@ -1,11 +1,19 @@
-# vite-react-electron
+# electron-vite-vue
 
-![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/vite-react-electron?color=fa6470&style=flat)
-![GitHub issues](https://img.shields.io/github/issues/caoxiemeihao/vite-react-electron?color=d8b22d&style=flat)
-![GitHub license](https://img.shields.io/github/license/caoxiemeihao/vite-react-electron?style=flat)
-[![Required Node.JS >= v14.17.0](https://img.shields.io/static/v1?label=node&message=%3E=14.17.0&logo=node.js&color=3f893e&style=flat)](https://nodejs.org/about/releases)
+[![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/ae3863e3-1aec-4eb1-8f9f-1890af56929d/deploy-status)](https://app.netlify.com/sites/electron-vite/deploys)
+![GitHub license](https://img.shields.io/github/license/caoxiemeihao/electron-vite-vue?style=flat)
+![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/electron-vite-vue?color=fa6470&style=flat)
+![GitHub forks](https://img.shields.io/github/forks/caoxiemeihao/electron-vite-vue?style=flat)
+
 
 **English | [简体中文](README.zh-CN.md)**
+
+🥳 Real simple `Electron` + `Vue` + `Vite` boilerplate.
+
+## Quick Start
+
+[![quick-start](https://asciinema.org/a/483731.svg)](https://asciinema.org/a/483731)
 
 ## Overview
 
@@ -15,142 +23,56 @@ The repo contains only the most basic files, dependencies and functionalities to
 
 You need a basic understanding of `Electron` and `Vite` to get started. But that's not mandatory - you can learn almost all the details by reading through the source code. Trust me, this repo is not that complex. 😋
 
-## Quick start
+## Directory
 
-```sh
-npm create electron-vite
-```
-
-![electron-vite-react.gif](https://github.com/electron-vite/electron-vite-react/blob/main/packages/renderer/public/electron-vite-react.gif?raw=true)
-
-## Debug
-
-![electron-vite-react-debug.gif](https://github.com/electron-vite/electron-vite-react/blob/main/packages/renderer/public/electron-vite-react-debug.gif?raw=true)
-
-<!--
-```sh
-# clone the project
-git clone https://github.com/caoxiemeihao/vite-react-electron.git
-
-# open the project directory
-cd vite-react-electron
-
-# install dependencies
-npm install
-
-# start the application
-npm run dev
-
-# make a production build
-npm run build
-```
--->
-
-## Directory structure
-
-Once `dev` or `build` npm-script is executed, the `dist` folder will be generated. It has the same structure as the `packages` folder, the purpose of this design is to ensure the correct path calculation.
+A `dist` folder will be generated everytime when `dev` or `build` command is executed. File structure of `dist` is identical to the `packages` directory to avoid any potential path calculation errors.
 
 ```tree
-├── build                     Resources for the production build
-|   ├── icon.icns             Icon for the application on macOS
-|   ├── icon.ico              Icon for the application
-|   ├── installerIcon.ico     Icon for the application installer
-|   └── uninstallerIcon.ico   Icon for the application uninstaller
-|
-├── dist                      Generated after build according to the "packages" directory
-|   ├── main
-|   ├── preload
-|   └── renderer
-|
-├── release                   Generated after production build, contains executables
-|   └──{version}
-|       ├── win-unpacked      Contains unpacked application executable
-|       └── Setup.exe         Installer for the application
-|
+├
+├── dist                      Will be generated following the structure of "packages" directory
+├   ├── main
+├   ├── preload
+├   ├── renderer
+├
 ├── scripts
-|   ├── build.mjs             Develop script -> npm run build
-|   └── watch.mjs             Develop script -> npm run dev
-|
+├   ├── build.mjs             Build script -> npm run build
+├   ├── watch.mjs             Develop script -> npm run dev
+├
 ├── packages
-|   ├── main                  Main-process source code
-|   |   └── vite.config.ts
-|   ├── preload               Preload-script source code
-|   |   └── vite.config.ts
-|   └── renderer              Renderer-process source code
-|       └── vite.config.ts
+├   ├── main                  Main-process source code
+├       ├── vite.config.ts
+├   ├── preload               Preload-script source code
+├       ├── vite.config.ts
+├   ├── renderer              Renderer-process source code
+├       ├── vite.config.ts
+├
 ```
 
-## Use Electron and NodeJS API
+## List the modules you may use as far as possible
 
-> 🚧 By default, Electron doesn't support the use of API related to Electron and NodeJS in the Renderer process, but someone might need to use it. If so, you can see the template 👉 **[electron-vite-boilerplate](https://github.com/caoxiemeihao/electron-vite-boilerplate)**
+Used in Main-process 👉 [electron-vite-boilerplate](https://github.com/caoxiemeihao/electron-vite-boilerplate)
 
-#### Invoke Electron and NodeJS API in `Preload-script`
+Used in Renderer-process 👉 [electron-vite-boilerplate/tree/nodeIntegration](https://github.com/caoxiemeihao/electron-vite-boilerplate/tree/nodeIntegration)
 
-- **packages/preload/index.ts**
+**ES Modules**
 
-    ```typescript
-    import fs from "fs"
-    import { contextBridge, ipcRenderer } from "electron"
+- [execa](https://www.npmjs.com/package/execa)
+- [node-fetch](https://www.npmjs.com/package/node-fetch)
+- [file-type](https://www.npmjs.com/package/file-type)
 
-    // --------- Expose some API to Renderer-process. ---------
-    contextBridge.exposeInMainWorld("fs", fs)
-    contextBridge.exposeInMainWorld("ipcRenderer", ipcRenderer)
-    ```
+**Native Addons**
 
-- **packages/renderer/src/global.d.ts**
+- [sqlite3](https://www.npmjs.com/package/sqlite3)
+- [serialport](https://www.npmjs.com/package/serialport)
 
-    ```typescript
-    // Defined in the window
-    interface Window {
-      fs: typeof import("fs")
-      ipcRenderer: import("electron").IpcRenderer
-    }
-    ```
+## Main window
+<img width="400px" src="https://raw.githubusercontent.com/caoxiemeihao/blog/main/electron-vue-vite/screenshot/electron-15.png" />
 
-- **packages/renderer/src/main.ts**
+## <!-- Wechat | | -->请我喝杯下午茶 🥳
 
-    ```typescript
-    // Use Electron and NodeJS API in the Renderer-process
-    console.log("fs", window.fs)
-    console.log("ipcRenderer", window.ipcRenderer)
-    ```
+<div style="display:flex;">
+  <!-- <img height="333px" src="https://raw.githubusercontent.com/caoxiemeihao/blog/main/assets/wechat/group/qrcode.jpg" />
+  &nbsp;&nbsp;&nbsp;&nbsp; -->
+  <img height="333px" src="https://raw.githubusercontent.com/caoxiemeihao/blog/main/assets/wechat/%24qrcode/%24.png" />
+</div>
 
-## Use SerialPort, SQLite3, or other node-native addons in the Main-process
-
-- First, you need to make sure that the dependencies in the `package.json` are NOT in the "devDependencies". Because the project will need them after packaged.
-
-- Main-process, Preload-script are also built with Vite, and they're built as [build.lib](https://vitejs.dev/config/#build-lib).  
-    So they just need to configure Rollup.
-
-**Click to see more** 👉 [packages/main/vite.config.ts](https://github.com/caoxiemeihao/vite-react-electron/blob/main/packages/main/vite.config.ts)
-
-```js
-export default {
-  build: {
-    // built lib for Main-process, Preload-script
-    lib: {
-      entry: "index.ts",
-      formats: ["cjs"],
-      fileName: () => "[name].js",
-    },
-    rollupOptions: {
-      // configuration here
-      external: ["serialport", "sqlite3"],
-    },
-  },
-}
-```
-
-## `dependencies` vs `devDependencies`
-
-- First, you need to know if your dependencies are needed after the application is packaged.
-
-- Like [serialport](https://www.npmjs.com/package/serialport), [sqlite3](https://www.npmjs.com/package/sqlite3) they are node-native modules and should be placed in `dependencies`. In addition, Vite will not build them, but treat them as external modules.
-
-- Dependencies like [Vue](https://www.npmjs.com/package/vue) and [React](https://www.npmjs.com/package/react), which are pure javascript modules that can be built with Vite, can be placed in `devDependencies`. This reduces the size of the application.
-
-<!--
-## Result
-
-<img width="400px" src="https://raw.githubusercontent.com/caoxiemeihao/blog/main/vite-react-electron/react-win.png" />
--->

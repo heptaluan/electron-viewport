@@ -1,11 +1,12 @@
+// import { sqlite3 } from "sqlite3";
 
 export { }
 
 declare global {
   interface Window {
-    // Expose some Api through preload script
-    fs: typeof import('fs')
-    ipcRenderer: import('electron').IpcRenderer
-    removeLoading: () => void
+    removeLoading: () => void,
+    // sqlite: sqlite3,
+    dbPath: string,
+    dicomParser: any
   }
 }

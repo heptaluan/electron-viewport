@@ -1,36 +1,48 @@
-import fs from 'fs'
-import { contextBridge, ipcRenderer } from 'electron'
-import { domReady } from './utils'
-import { useLoading } from './loading'
+import { domReady } from "./utils";
+import { useLoading } from "./loading";
+// import sqlite3 from 'sqlite3'
+import { join } from "path";
+import dicomParser from "dicom-parser";
 
-const { appendLoading, removeLoading } = useLoading()
+import * as cornerstone from "cornerstone-core";
+import * as cornerstoneMath from "cornerstone-math";
+import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
+import * as cornerstoneTools from "cornerstone-tools";
 
-;(async () => {
-  await domReady()
+cornerstoneTools.external.cornerstone = cornerstone;
+cornerstoneTools.external.cornerstoneMath = cornerstoneMath;
+cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+cornerstoneWADOImageLoader.external.cornerstoneMath = cornerstoneMath;
 
-  appendLoading()
-})()
+cornerstoneTools.init();
 
-// --------- Expose some API to the Renderer process. ---------
-contextBridge.exposeInMainWorld('fs', fs)
-contextBridge.exposeInMainWorld('removeLoading', removeLoading)
-contextBridge.exposeInMainWorld('ipcRenderer', withPrototype(ipcRenderer))
+cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
+cornerstoneWADOImageLoader.webWorkerManager.initialize({
+  maxWebWorkers: navigator.hardwareConcurrency || 1,
+  startWebWorkersOnDemand: true,
+  taskConfiguration: {
+    decodeTask: {
+      initializeCodecsOnStartup: false,
+      usePDFJS: false,
+      strict: false,
+    },
+  },
+});
 
-// `exposeInMainWorld` can't detect attributes and methods of `prototype`, manually patching it.
-function withPrototype(obj: Record<string, any>) {
-  const protos = Object.getPrototypeOf(obj)
+(window as any).cornerstone = cornerstone;
+(window as any).cornerstoneTools = cornerstoneTools;
 
-  for (const [key, value] of Object.entries(protos)) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) continue
+const { appendLoading, removeLoading } = useLoading();
+window.removeLoading = removeLoading;
 
-    if (typeof value === 'function') {
-      // Some native APIs, like `NodeJS.EventEmitter['on']`, don't work in the Renderer process. Wrapping them into a function.
-      obj[key] = function (...args: any) {
-        return value.call(obj, ...args)
-      }
-    } else {
-      obj[key] = value
-    }
-  }
-  return obj
-}
+domReady().then(appendLoading);
+// @ts-ignore
+// window.sqlite = sqlite3;
+// window.initSqlJs = initSqlJs
+
+const rootPath = join(__dirname, "..");
+// const dbPath = join(rootPath, 'static', 'dicom.db');
+const dbPath = join("D:\\vs2019\\DicomViewer\\bin\\Debug", "dicom.db");
+window.dbPath = dbPath;
+window.dicomParser = dicomParser;

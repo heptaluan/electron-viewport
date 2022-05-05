@@ -1,15 +1,19 @@
 {
-  "extends": "./paths.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "jsx": "preserve",
     "esModuleInterop": true,
-    "moduleResolution": "Node",
     "resolveJsonModule": true,
+    "sourceMap": true,
+    "baseUrl": "./",
     "strict": true,
-    "jsx": "react-jsx"
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   }
 }

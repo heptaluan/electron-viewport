@@ -3,35 +3,34 @@
  */
 {
   "appId": "YourAppID",
-  "productName": "YourAppName",
-  "copyright": "Copyright © 2022 ${author}",
   "asar": true,
   "directories": {
-    "output": "release/${version}",
-    "buildResources": "resources"
+    "output": "release/${version}"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
+  "mac": {
+    "artifactName": "${productName}_${version}.${ext}",
+    "target": [
+      "dmg"
+    ]
+  },
   "win": {
     "target": [
       {
         "target": "nsis",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       }
     ],
-    "artifactName": "${productName}-${version}-Setup.${ext}"
+    "artifactName": "${productName}_${version}.${ext}"
   },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false
-  },
-  "mac": {
-    "target": ["dmg"],
-    "artifactName": "${productName}-${version}-Installer.${ext}"
-  },
-  "linux": {
-    "target": ["AppImage"],
-    "artifactName": "${productName}-${version}-Installer.${ext}"
   }
 }
