@@ -2,7 +2,7 @@ import React from 'react'
 import CornerstoneViewport from 'react-cornerstone-viewport'
 import './ViewerMain.scss'
 import useWindowSize from '../../hook/useWindowSize'
-import Toolbar from '../../components/Toolbar/Toolbar'
+
 import CustomOverlay from '../common/CustomOverlay/CustomOverlay'
 import { Spin } from 'antd'
 
@@ -16,7 +16,6 @@ const ViewerMain = props => {
         </div>
       ) : (
         <div>
-          <Toolbar handleToolbarClick={props.handleToolbarClick} />
           <CornerstoneViewport
             imageIdIndex={props.imageIdIndex}
             viewportOverlayComponent={CustomOverlay}

@@ -1,6 +1,7 @@
 .left-side-panel-box {
   flex: 1;
   max-width: 250px;
+  min-width: 180px;
   height: 100%;
 
   .list-box-wrap {
@@ -11,7 +12,7 @@
       overflow: overlay;
 
       .empty {
-        padding: 15px;
+        padding: 10px;
         text-align: center;
         font-size: 14px;
       }
