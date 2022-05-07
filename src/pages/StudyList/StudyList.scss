@@ -1,24 +1,29 @@
 .study-list-container {
-  width: 100%;
-  padding: 100px 8% 0;
-  position: absolute;
-  z-index: 2;
-
   .search-box-wrap {
+    margin-top: 15px;
     margin-bottom: 25px;
+    padding: 0 20px;
 
-    .header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
+    .search-group,
+    .search-btns {
+      display: inline-block;
     }
 
-    .search-box {
-      display: flex;
+    .search-btns {
+      margin-left: 20px;
 
-      .ant-input {
-        margin-right: 20px;
+      button:first-child {
+        margin-right: 10px;
       }
+    }
+  }
+
+  .table-box {
+    margin-top: 15px;
+    padding: 0 20px;
+
+    header {
+      margin-bottom: 10px;
     }
   }
 }

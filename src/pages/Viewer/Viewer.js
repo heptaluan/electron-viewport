@@ -5,7 +5,6 @@ import ViewerMain from '../../components/ViewerMain/ViewerMain'
 import cornerstone from 'cornerstone-core'
 import cornerstoneTools from 'cornerstone-tools'
 import Toolbar from '../../components/Toolbar/Toolbar'
-import { Button } from 'antd'
 
 const Viewer = () => {
   const defaultTools = [
@@ -210,9 +209,6 @@ const Viewer = () => {
 
   return (
     <div className="viewer-box">
-      <div className="header-box">
-        <Button>选择dicom文件夹</Button>
-      </div>
       <Toolbar handleToolbarClick={handleToolbarClick} />
       <div className="viewer-center-box">
         <LeftSidePanel data={sequenceListData} />
