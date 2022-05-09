@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './Viewer.scss'
 import LeftSidePanel from '../../components/LeftSidePanel/LeftSidePanel'
 import ViewerMain from '../../components/ViewerMain/ViewerMain'
+import MiddleSidePanel from '../../components/MiddleSidePanel/MiddleSidePanel'
 import cornerstone from 'cornerstone-core'
 import cornerstoneTools from 'cornerstone-tools'
 import Toolbar from '../../components/Toolbar/Toolbar'
@@ -110,7 +111,7 @@ const Viewer = () => {
 
   // 切换当前视图
   const changeActiveImage = (index, cornerstoneElement) => {
-    cornerstone.loadImage(imagesConfig[index]).then(image => {
+    cornerstone.loadImage(imagesConfig[index]).then((image) => {
       cornerstone.displayImage(cornerstoneElement, image)
       cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
       cornerstoneTools.addToolState(cornerstoneElement, 'stack', {
@@ -121,11 +122,11 @@ const Viewer = () => {
   }
 
   // 监听视图变化事件
-  const handleElementEnabledEvt = elementEnabledEvt => {
+  const handleElementEnabledEvt = (elementEnabledEvt) => {
     const cornerstoneElement = elementEnabledEvt.detail.element
     setCornerstoneElement(cornerstoneElement)
 
-    cornerstoneElement.addEventListener('cornerstonenewimage', newImage => {
+    cornerstoneElement.addEventListener('cornerstonenewimage', (newImage) => {
       // const curImageId = newImage.detail.image.imageId
       // const index = imagesConfig.findIndex(item => item === curImageId)
 
@@ -140,11 +141,10 @@ const Viewer = () => {
     //   console.log(1)
     // })
 
-    cornerstoneElement.addEventListener('cornerstoneimagerendered', imageRenderedEvent => {
+    cornerstoneElement.addEventListener('cornerstoneimagerendered', (imageRenderedEvent) => {
       // const curImageId = imageRenderedEvent.detail.image.imageId
       // const index = imagesConfig.findIndex(item => item === curImageId)
     })
-
   }
 
   // 调整窗宽窗位
@@ -206,18 +206,19 @@ const Viewer = () => {
 
   // ===========================================================
 
-
   return (
     <div className="viewer-box">
       <Toolbar handleToolbarClick={handleToolbarClick} />
       <div className="viewer-center-box">
         <LeftSidePanel data={sequenceListData} />
         <ViewerMain
-          handleToolbarClick={handleToolbarClick}
           handleElementEnabledEvt={handleElementEnabledEvt}
           toolsConfig={toolsConfig}
           imagesConfig={imagesConfig}
         />
+        <div className="middle-box-wrap">
+          <MiddleSidePanel />
+        </div>
       </div>
     </div>
   )

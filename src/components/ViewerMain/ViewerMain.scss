@@ -4,6 +4,21 @@
   height: 100%;
   overflow: hidden;
   position: relative;
+  padding: 10px 15px;
+
+  .error-tips {
+    width: calc(100% - 30px);
+    height: calc(100% - 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 15px;
+    top: 10px;
+    background: #000000;
+    color: #fff;
+    z-index: 9;
+  }
 }
 
 .top-mid.orientation-marker {

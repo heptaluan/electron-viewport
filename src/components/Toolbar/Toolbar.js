@@ -1,9 +1,15 @@
 import React, { useState } from 'react'
 import './Toolbar.scss'
 import IconFont from '../common/IconFont/index'
-import { Tooltip } from 'antd'
+import { Tooltip, Button, Modal } from 'antd'
+import { useHistory } from 'react-router-dom'
+import ModalContent from '../ModalContent/ModalContent'
 
 const toolbarList = [
+  {
+    id: 0,
+    type: 'hr',
+  },
   {
     id: 1,
     text: '自动播放',
@@ -90,7 +96,9 @@ const toolbarList = [
   // },
 ]
 
-const Toolbar = props => {
+const Toolbar = (props) => {
+  const history = useHistory()
+  const [visible, setVisible] = useState(false)
   const [state, setstate] = useState(toolbarList)
 
   const handleToolbarClick = (e, index, type) => {
@@ -99,7 +107,7 @@ const Toolbar = props => {
       setstate([...state])
     } else {
       state[index].checked = !state[index].checked
-      state.map(item => {
+      state.map((item) => {
         if (item.type !== type && item.type !== 'playClip' && item.type !== 'vflip' && item.type !== 'hflip')
           item.checked = false
       })
@@ -111,24 +119,46 @@ const Toolbar = props => {
   }
 
   return (
-    <ul className="tool-bar-box">
-      {toolbarList.map((item, index) => {
-        return item.type === 'hr' ? (
-          <li key={item.id} className="hr">
-            <div></div>
-          </li>
-        ) : (
-          <li
-            id={item.type === 'MarkNodule' && item.checked ? 'mark' : null}
-            key={item.id}
-            className={item.checked ? (item.filter ? 'filter-active' : 'active') : ''}
-            onClick={e => handleToolbarClick(e, index, item.type)}
-            data-type={item.type}
-          >
-            <Tooltip title={item.text}>{item.icon}</Tooltip>
-          </li>
-        )
-      })}
+    <ul className="tool-bar-wrap">
+      <div className='tool-bar-box'>
+        <div className="back-btn" onClick={() => history.push(`/studyList`)}>
+          <IconFont style={{ fontSize: '24px' }} type="icon-back" />
+        </div>
+        <div className="tool-bar">
+          {toolbarList.map((item, index) => {
+            return item.type === 'hr' ? (
+              <li key={item.id} className="hr">
+                <div></div>
+              </li>
+            ) : (
+              <li
+                id={item.type === 'MarkNodule' && item.checked ? 'mark' : null}
+                key={item.id}
+                className={item.checked ? (item.filter ? 'filter-active' : 'active') : ''}
+                onClick={(e) => handleToolbarClick(e, index, item.type)}
+                data-type={item.type}
+              >
+                <Tooltip title={item.text}>{item.icon}</Tooltip>
+              </li>
+            )
+          })}
+        </div>
+      </div>
+      <div className="show-modal">
+        <Button onClick={() => setVisible(true)}>查看头信息</Button>
+      </div>
+
+      <Modal
+        title="DICOM信息"
+        centered
+        visible={visible}
+        onOk={() => setVisible(false)}
+        onCancel={() => setVisible(false)}
+        width={1000}
+        footer={null}
+      >
+        <ModalContent />
+      </Modal>
     </ul>
   )
 }
