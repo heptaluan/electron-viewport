@@ -5,7 +5,7 @@ import { Checkbox, Button, Input, Descriptions } from 'antd'
 
 const { TextArea } = Input
 
-const MiddleSidePanel = (props) => {
+const MiddleSidePanel = props => {
   const handleListClick = (index, num) => {
     props.onCheckChange(index, num)
   }
@@ -34,30 +34,21 @@ const MiddleSidePanel = (props) => {
               </Checkbox>
               <div className="size">大小(单位mm)</div>
               <div className="type">类型</div>
-              {/* <div className="risk">风险</div> */}
-              <div className="soak">结节</div>
-              <div className="action">状态</div>
+              <div className="suggest">建议</div>
             </div>
             <div id="tableIItemBox" className="table-content">
               {props.noduleList?.map((item, index) => (
                 <div
-                  key={item.id}
+                  key={item.noduleNum}
                   className={`table-item ${item.active ? 'item-active' : ''}`}
-                  onClick={(e) => handleListClick(index, item.num)}
+                  onClick={e => handleListClick(index, item.num)}
                 >
-                  {/* <div className="icon">{item.id}</div> */}
-                  <Checkbox onChange={(e) => props.onCheckChange(index, item.num)} checked={item.checked}>
+                  <Checkbox onChange={e => props.onCheckChange(index, item.num)} checked={item.checked}>
                     <div className="num">{item.num}</div>
                   </Checkbox>
-                  <div className="size">{item.size.replace(/m/g, '')}</div>
+                  <div className="size">{item.diameter}</div>
                   <div className="type">{item.type}</div>
-                  {/* <div className="risk">{item.risk}</div> */}
-                  <div className="soak">
-                    <span>{item.state === undefined ? '-' : item.state ? '是' : '否'}</span>
-                  </div>
-                  <div className="action review-state">
-                    <span className={item.review ? 'review' : null}>{item.review === true ? '已检阅' : '未检阅'}</span>
-                  </div>
+                  <div className="suggest">{item.suggest}</div>
                 </div>
               ))}
             </div>

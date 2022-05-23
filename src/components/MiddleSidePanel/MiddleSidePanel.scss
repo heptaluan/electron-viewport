@@ -28,9 +28,9 @@
     }
 
     .nodule-list-box {
-      flex: 4;
+      flex: 5;
       height: 320px;
-      max-height: 600px;
+      max-height: 800px;
       display: flex;
       flex-direction: column;
       padding: 0 15px;
@@ -54,25 +54,20 @@
           border: 1px solid transparent;
           padding: 0 10px 0 5px;
 
-          .icon,
-          .more {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .icon,
-          .risk,
-          .soak,
-          .action {
-            flex: 1;
-          }
-
           .num,
-          .size,
-          .type {
+          .type,
+          .suggest {
             flex: 2;
           }
+
+          .suggest {
+            max-width: 85px;
+          }
+
+          .size {
+            flex: 3;
+          }
+
         }
 
         .table-content {
@@ -80,7 +75,7 @@
           flex-direction: column;
           overflow-x: hidden;
           overflow-y: overlay;
-          min-height: 300px;
+          min-height: 500px;
 
           .table-item {
             user-select: none;
@@ -103,17 +98,21 @@
             }
           }
 
-          .icon,
-          .risk,
-          .soak,
-          .action {
-            flex: 1;
+          .num,
+          .type,
+          .suggest {
+            flex: 2;
           }
 
-          .num,
-          .size,
-          .type {
-            flex: 2;
+          .size {
+            flex: 3;
+          }
+
+          .suggest {
+            max-width: 85px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
 
           .review-state {
@@ -128,7 +127,7 @@
     }
 
     .image-info-box {
-      flex: 4;
+      flex: 3;
       display: flex;
       flex-direction: column;
       padding: 0 15px;

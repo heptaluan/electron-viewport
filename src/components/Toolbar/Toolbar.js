@@ -7,10 +7,6 @@ import ModalContent from '../ModalContent/ModalContent'
 
 const toolbarList = [
   {
-    id: 0,
-    type: 'hr',
-  },
-  {
     id: 1,
     text: '自动播放',
     icon: <IconFont style={{ fontSize: '24px' }} type="icon-asmkticon0229" />,
@@ -59,13 +55,13 @@ const toolbarList = [
     type: 'EllipticalRoi',
     checked: false,
   },
-  {
-    id: 8,
-    text: '矩形',
-    icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing" />,
-    type: 'RectangleRoi',
-    checked: false,
-  },
+  // {
+  //   id: 8,
+  //   text: '矩形',
+  //   icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing" />,
+  //   type: 'RectangleRoi',
+  //   checked: false,
+  // },
   {
     id: 9,
     text: '角度选择',
@@ -81,19 +77,55 @@ const toolbarList = [
     checked: false,
   },
   {
+    id: 17,
+    text: '矩形',
+    icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing" />,
+    type: 'RectangleRoi',
+    checked: false,
+  },
+  {
     id: 11,
-    text: '清除',
+    text: '缩放',
+    icon: <IconFont style={{ fontSize: '18px' }} type="icon-zoom" />,
+    type: 'Zoom',
+    checked: false,
+  },
+  {
+    id: 12,
+    text: '平移',
+    icon: <IconFont style={{ fontSize: '18px' }} type="icon-move" />,
+    type: 'Pan',
+    checked: false,
+  },
+  {
+    id: 13,
+    type: 'hr',
+  },
+  {
+    id: 14,
+    text: '复原图像',
+    icon: <IconFont style={{ fontSize: '18px' }} type="icon-reset_defalut" />,
+    type: 'Reset',
+    checked: false,
+  },
+  {
+    id: 15,
+    text: '清除标注',
     icon: <IconFont style={{ fontSize: '18px' }} type="icon-qingchuhuancun" />,
     type: 'Eraser',
     checked: false,
   },
-  // {
-  //   id: 12,
-  //   text: '标记',
-  //   icon: <IconFont style={{ fontSize: '20px' }} type="icon-shizi-" />,
-  //   type: 'MarkNodule',
-  //   checked: false,
-  // },
+  {
+    id: 16,
+    type: 'hr',
+  },
+  {
+    id: 18,
+    text: '结节标注',
+    icon: <IconFont style={{ fontSize: '20px' }} type="icon-shizi-" />,
+    type: 'MarkNodule',
+    checked: false,
+  },
 ]
 
 const Toolbar = (props) => {
@@ -105,6 +137,9 @@ const Toolbar = (props) => {
     if (type === 'playClip' || type === 'vflip' || type === 'hflip') {
       state[index].checked = !state[index].checked
       setstate([...state])
+    } else if (type === 'Reset') {
+      props.handleToolbarClick(type, state[index].checked)
+      return
     } else {
       state[index].checked = !state[index].checked
       state.map((item) => {
