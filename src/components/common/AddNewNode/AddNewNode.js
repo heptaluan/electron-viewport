@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import './AddNewNode.scss'
-import { Radio, Select, Button, Input } from 'antd'
+import { Radio, Select, Input } from 'antd'
 
 const { Option } = Select
 
@@ -26,9 +26,7 @@ const AddNewNode = props => {
 
       {props.toolList?.map((item, index) => (
         <div className="add-box" key={item.uuid}>
-          <div className="list-header">
-            结节信息
-          </div>
+          <div className="list-header">结节信息</div>
           <div className="list">
             <span className="list-title">肺：</span>
             <Radio.Group value={item.lung} onChange={e => onLungChange(e, item.uuid)}>

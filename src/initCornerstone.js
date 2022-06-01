@@ -42,4 +42,5 @@ export default function initCornerstone() {
   // Debug
   window.cornerstone = cornerstone
   window.cornerstoneTools = cornerstoneTools
+  window.dicomParser = dicomParser
 }

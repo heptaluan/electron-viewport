@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import './Toolbar.scss'
 import IconFont from '../common/IconFont/index'
 import { Tooltip, Button, Modal } from 'antd'
-import { useHistory } from 'react-router-dom'
 import ModalContent from '../ModalContent/ModalContent'
 
 const toolbarList = [
@@ -79,7 +78,7 @@ const toolbarList = [
   {
     id: 17,
     text: '矩形',
-    icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing" />,
+    icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing1" />,
     type: 'RectangleRoi',
     checked: false,
   },
@@ -122,14 +121,13 @@ const toolbarList = [
   {
     id: 18,
     text: '结节标注',
-    icon: <IconFont style={{ fontSize: '20px' }} type="icon-shizi-" />,
-    type: 'MarkNodule',
+    icon: <IconFont style={{ fontSize: '20px' }} type="icon-juxing" />,
+    type: 'AddNodule',
     checked: false,
   },
 ]
 
-const Toolbar = (props) => {
-  const history = useHistory()
+const Toolbar = props => {
   const [visible, setVisible] = useState(false)
   const [state, setstate] = useState(toolbarList)
 
@@ -142,7 +140,7 @@ const Toolbar = (props) => {
       return
     } else {
       state[index].checked = !state[index].checked
-      state.map((item) => {
+      state.map(item => {
         if (item.type !== type && item.type !== 'playClip' && item.type !== 'vflip' && item.type !== 'hflip')
           item.checked = false
       })
@@ -155,8 +153,8 @@ const Toolbar = (props) => {
 
   return (
     <ul className="tool-bar-wrap">
-      <div className='tool-bar-box'>
-        <div className="back-btn" onClick={() => history.push(`/studyList`)}>
+      <div className="tool-bar-box">
+        <div className="back-btn" onClick={() => props.setShowViewer(false)}>
           <IconFont style={{ fontSize: '24px' }} type="icon-back" />
         </div>
         <div className="tool-bar">
@@ -167,10 +165,10 @@ const Toolbar = (props) => {
               </li>
             ) : (
               <li
-                id={item.type === 'MarkNodule' && item.checked ? 'mark' : null}
+                id={item.type === 'AddNodule' && item.checked ? 'mark' : null}
                 key={item.id}
                 className={item.checked ? (item.filter ? 'filter-active' : 'active') : ''}
-                onClick={(e) => handleToolbarClick(e, index, item.type)}
+                onClick={e => handleToolbarClick(e, index, item.type)}
                 data-type={item.type}
               >
                 <Tooltip title={item.text}>{item.icon}</Tooltip>

@@ -1,7 +1,12 @@
 .viewer-box {
   width: 100%;
   height: 100%;
-
+  .toolBox {
+    display: flex;
+    .select-file-box {
+      height: initial;
+    }
+  }
   .viewer-center-box {
     position: relative;
     display: flex;

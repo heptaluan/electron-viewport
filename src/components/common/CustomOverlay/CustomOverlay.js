@@ -11,10 +11,10 @@ const CustomOverlay = props => {
         总帧数：<span>{props.stackSize}</span>
       </li>
       <li>
-        窗宽：<span>{props.windowWidth} HU</span>
+        窗宽：<span>{Number(props.windowWidth).toFixed(2)} HU</span>
       </li>
       <li>
-        窗位：<span>{props.windowCenter} HU</span>
+        窗位：<span>{Number(props.windowCenter).toFixed(2)} HU</span>
       </li>
     </ul>
   )

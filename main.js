@@ -87,13 +87,15 @@ const setupMenu = () => {
 function createWindow() {
   // 创建一个浏览器窗口.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1250,
+    height: 1110,
     webPreferences: {
       nodeIntegration: true, //允许使用node的方式引入
+      contextIsolation: false,
       webSecurity: false, // 允许使用本地资源
+      preload: path.join(__dirname, 'preload.js'),
     },
-    backgroundColor: '#B1FF9D',
+    backgroundColor: '#d3e4f5',
   })
 
   // 这里要注意一下，这里是让浏览器窗口加载网页。
