@@ -11,12 +11,12 @@ import AddNoduleTool from '../../components/common/AddNoduleTool/AddNoduleTool'
 import { Modal, message } from 'antd'
 import Draggable from 'react-draggable'
 import AddNewNode from '../../components/common/AddNewNode/AddNewNode'
+import {insertData, queryNodeList, SQLContainer} from "../../util/sqlite";
 
 const Viewer = props => {
   // 初始化
   // eslint-disable-next-line no-unused-vars
   const [imagesConfig, setImagesConfig] = useState([])
-  const [imagesFrame, setImagesFrame] = useState([])
 
   // eslint-disable-next-line no-unused-vars
   const [sequenceListData, setLeftSidePanelData] = useState([])
@@ -36,22 +36,22 @@ const Viewer = props => {
     nodeRef.current = {
       noduleList,
       noduleMapList,
-      imagesFrame,
       imagesConfig,
     }
-  }, [imagesConfig, imagesFrame, noduleList, noduleMapList])
+  }, [imagesConfig, noduleList, noduleMapList])
 
   // 影像信息
   useEffect(() => {
-    const data = props.data[0].frame
-    const imagesConfig = []
-    for (let i = 0; i < data.length; i++) {
-      imagesConfig.push(data[i].imageId)
-    }
-    setImagesConfig([...imagesConfig])
-    setImagesFrame([...imagesConfig])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    props.data.seriesInfo[0].imageIDList.then(res => {
+      if (res.length > 0) {
+        const imagesConfig = []
+        for (let i = 0; i < res.length; i++) {
+          imagesConfig.push(res[i])
+        }
+        setImagesConfig([...imagesConfig])
+      }
+    })
+  }, [props.data])
 
   // 初始化结节信息
   useEffect(() => {
@@ -143,6 +143,8 @@ const Viewer = props => {
   const addNodeTool = (cornerstoneElement, index = 0) => {
     const item = nodeRef.current.noduleMapList.filter(item => item.index === index)
     const checkItme = nodeRef.current.noduleList.find(item => item.checked === true)
+
+    console.log(nodeRef.current.noduleList)
 
     if (item.length >= 1) {
       cornerstoneTools.clearToolState(cornerstoneElement, 'MarkNodule')
@@ -300,38 +302,36 @@ const Viewer = props => {
 
   // 格式化提交数据
   const formatPostData = () => {
-    const postData = {
-      resultInfo: [],
-    }
-    for (let i = 0; i < noduleList.length; i++) {
-      const item = noduleList[i]
-      postData.resultInfo.push({
-        index: noduleList.length + 1,
+    const item = noduleList[noduleList.length - 1]
+    const postData = [
+      {
+        patientID: props.data.patientID,
+        seriesNo: props.data.seriesInfo[0].seriesNo,
         imageIndex: item.num,
+        noduleName: item.noduleName,
+        noduleNum: item.noduleNum,
         lungLocation: item.lung,
         lobeLocation: item.lobe,
         featureLabel: item.type,
+        noduleSize: item.noduleSize,
         suggest: item.suggest,
-        noduleName: item.noduleName,
-        noduleNum: item.noduleNum,
-        nodeBox: item.nodeBox,
+        nodeBox: item.nodeBox.toString(),
         diameter: item.diameter,
         maxHu: item.maxHu,
         minHu: item.minHu,
         meanHu: item.meanHu,
         diameterNorm: item.diameterNorm,
-        noduleSize: item.noduleSize,
         centerHu: item.centerHu,
-      })
-    }
-    postData.resultInfo = JSON.stringify(postData.resultInfo)
+      }
+    ]
     return postData
   }
 
   // 暂存结节数据
   const saveResults = () => {
+    debugger
     const postData = formatPostData()
-    localStorage.setItem('data', postData.resultInfo)
+    insertData(SQLContainer.insertNodeListSql, postData);
     message.success(`结节结果保存成功`)
   }
 
@@ -531,21 +531,24 @@ const Viewer = props => {
 
     cornerstoneElement.addEventListener('cornerstonenewimage', newImage => {
       const curImageId = newImage.detail.image.imageId
-      const index = nodeRef.current.imagesFrame.findIndex(item => item.imageId === curImageId)
+      const index = nodeRef.current.imagesConfig.findIndex(item => item === curImageId)
 
       if (toolFlag) {
         setToolEnable()
         toolFlag = false
+        
+        const stack = {
+          currentImageIdIndex: index,
+          imageIds: nodeRef.current.imagesConfig,
+        }
+  
+        cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
+        cornerstoneTools.addToolState(cornerstoneElement, 'stack', stack)
+
       }
 
-      const stack = {
-        currentImageIdIndex: index,
-        imageIds: nodeRef.current.imagesConfig,
-      }
 
       cornerstoneTools.setToolActive('MarkNodule', { mouseButtonMask: 1 })
-      cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
-      cornerstoneTools.addToolState(cornerstoneElement, 'stack', stack)
       cornerstoneTools.setToolActive('StackScrollMouseWheel', {})
 
       setTimeout(() => {
@@ -605,8 +608,16 @@ const Viewer = props => {
     cornerstone.setViewport(element, viewport)
   }
 
+  const loadNodeList = () => {
+    console.log(111)
+    queryNodeList(props.data.patientID, props.data.seriesInfo[0].seriesNo, res => {
+      console.log(res)
+    })
+  }
+
   return (
     <div className="viewer-box">
+      <button onClick={loadNodeList}>121212</button>
       <Toolbar handleToolbarClick={handleToolbarClick} setShowViewer={props.setShowViewer} />
       <div className="viewer-center-box">
         <LeftSidePanel data={sequenceListData} />

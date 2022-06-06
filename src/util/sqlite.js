@@ -102,9 +102,14 @@ export const SQLContainer = {
     'insert into dicom_study(patientKey, patientID,acquisitionDate, studyID, studyDescription,addTime,sequenceNum ) values(?,?,?,?,?,?,?)',
   insertSeriesSql:
     'insert into dicom_series(patientKey, studyID,seriesNo,seriesDescription, modality,acquisitionDate,size,addTime,framePath,frameNum) values(?,?,?,?,?,?,?,?,?,?)',
+  nodeListSql:
+    'create table if not exists node_list(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, patientID varchar(32), seriesNo varchar(32), imageIndex varchar(32), noduleName varchar(32), noduleNum varchar(32), lungLocation varchar(32), lobeLocation varchar(32), featureLabel varchar(32), noduleSize varchar(32), suggest varchar(32), nodeBox varchar(255), diameter varchar(32), maxHu varchar(32), minHu varchar(32), meanHu varchar(32), diameterNorm varchar(32), centerHu varchar(32))',
+  insertNodeListSql:
+    'insert into node_list(patientID, seriesNo, imageIndex, noduleName, noduleNum, lungLocation, lobeLocation, featureLabel, noduleSize, suggest, nodeBox, diameter, maxHu, minHu, meanHu, diameterNorm, centerHu ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
   queryPatientSql: 'select * from dicom_patient',
   queryStudySql: 'select * from dicom_study',
   querySeriesSql: 'select * from dicom_series',
+  queryNodeListSql: 'select * from node_list',
 }
 
 export const queryDicomData = DBFunction => {
@@ -115,11 +120,18 @@ export const queryStudyByPatientID = (patientID, DBFunction) => {
   const sql = ` where patientID ='${patientID}'`
   queryData(SQLContainer.queryStudySql + sql, DBFunction)
 }
+
 export const querySeriesByStudyID = (studyID, DBFunction) => {
   const sql = ` where studyID = '${studyID}'`
   queryData(SQLContainer.querySeriesSql + sql, DBFunction)
 }
 
+export const queryNodeList = (patientID, seriesNo, callback) => {
+  const sql = ` where patientID = '${patientID}' and seriesNo = '${seriesNo}'`
+  queryData(SQLContainer.queryNodeListSql + sql, callback)
+}
+
 createTable(SQLContainer.dicomPatientSql)
 createTable(SQLContainer.dicomStudySql)
 createTable(SQLContainer.dicomSeriesSql)
+createTable(SQLContainer.nodeListSql)

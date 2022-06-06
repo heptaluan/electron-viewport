@@ -10,6 +10,7 @@ import {
   queryData,
   SQLContainer,
 } from '../../util/sqlite'
+import { formatFile } from '../../util/index'
 
 const dicomColumns = [
   {
@@ -169,8 +170,12 @@ const StudyList = props => {
   }
   const seriesGetAll = seriesList => {
     selectedData.seriesInfo = Array.isArray(seriesList) ? seriesList : [seriesList]
+    selectedData.seriesInfo.forEach(ele => {
+      ele.imageIDList = formatFile(ele.framePath)
+    })
     props.setData(selectedData)
     console.log('all: ', selectedData)
+    props.setShowViewer(true)
   }
 
   const studyRowClicked = (record, index) => {
@@ -254,7 +259,7 @@ const StudyList = props => {
                 patientRowClicked(record)
               },
               onDoubleClick: event => {
-                // history.push(`/viewer/${record.PatientID}`)
+                
                 console.log('Patient list: ', patientData)
                 patientGetAll(record)
               },

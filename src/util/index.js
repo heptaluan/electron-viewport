@@ -30,15 +30,15 @@ export function dicomDateTimeToLocale(dateTime) {
   return `${localeDate} - ${time}`
 }
 
-export const formatFile = fileList => {
-  const imagesConfig = []
+export const formatFile = async fileList => {
+  fileList = fileList.split(',')
+  const imagesIDConfig = []
   for (let i = 0; i < fileList.length; i++) {
-    window.fs.readFile(fileList[i], (err, data) => {
-      if (err) console.log(err)
-      const file = new window.File([data], '11.dcm', { type: 'application/dicom' })
-      const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file)
-      imagesConfig.push(imageId)
-    })
+    const data = window.fs.readFileSync(fileList[i])
+    const fileName = fileList[i].split('\\').pop()
+    const file = new window.File([data], fileName, { type: 'application/dicom' })
+    const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file)
+    imagesIDConfig.push(imageId)
   }
-  return imagesConfig
+  return imagesIDConfig
 }
