@@ -22,7 +22,7 @@ const SelectFile = (props) => {
     const creatPatient = (dict, time) => {
         patientList.push(
             {
-                key: indexKey,
+                key: dict['00100020'].Value[0] + ' '+ dicomDateTimeToLocale(dict['00080022'].Value[0] + '.' + dict['00080032'].Value[0]),
                 patientName: dict['00100010'].Value[0],
                 patientID: dict['00100020'].Value[0],
                 patientGender: dict['00100040'].Value[0],
@@ -39,7 +39,7 @@ const SelectFile = (props) => {
     }
     const createStudy = (dict, time) => {
         studyList.push({
-            key: indexKey,
+            key: dict['00100020'].Value[0] + ' ' + dict['00200010'].Value[0],
             patientID: dict['00100020'].Value[0],
             acquisitionDate:  dicomDateTimeToLocale(dict['00080022'].Value[0] + '.' + dict['00080032'].Value[0]),
             seriesInfo: [],
@@ -51,7 +51,7 @@ const SelectFile = (props) => {
     }
     const createSeries = (dict, time) => {
         seriesList.push( {
-            key: indexKey,
+            key: dict['00100020'].Value[0] + ' ' + dict['00200011'].Value[0],
             studyID: dict['00200010'].Value[0],
             seriesNo: dict['00200011'].Value[0],
             seriesDescription: dict['0008103E'].Value[0],

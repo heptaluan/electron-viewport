@@ -78,7 +78,7 @@ const toolbarList = [
   {
     id: 17,
     text: '矩形',
-    icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing1" />,
+    icon: <IconFont style={{ fontSize: '24px' }} type="icon-juxing" />,
     type: 'RectangleRoi',
     checked: false,
   },
@@ -137,6 +137,10 @@ const Toolbar = props => {
       setstate([...state])
     } else if (type === 'Reset') {
       props.handleToolbarClick(type, state[index].checked)
+      state.map(item => {
+        if (item.type === 'vflip' || item.type === 'hflip') item.checked = false
+      })
+      setstate([...state])
       return
     } else {
       state[index].checked = !state[index].checked

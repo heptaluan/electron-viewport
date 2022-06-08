@@ -10,23 +10,23 @@
     padding: 15px 10px;
 
     .list-box {
-      border: 1px solid #ccc;
-      padding: 10px;
       cursor: pointer;
-
-
-      &.active {
-        border: 1px solid red;
-      }
 
       &:last-child {
         margin-bottom: 0;
       }
 
       .list-item {
-        margin-bottom: 15px;
+        border: 1px dashed #ccc;
+        margin-bottom: 24px;
+        padding: 10px;
+        .title {
+          margin-bottom: 8px;
+          font-size: 14px;
+        }
+
         &.active {
-          border: 2px solid red;
+          border: 1px solid red;
 
         }
       }

@@ -19,7 +19,7 @@ const Viewer = props => {
   const [imagesConfig, setImagesConfig] = useState([])
 
   // eslint-disable-next-line no-unused-vars
-  const [sequenceListData, setLeftSidePanelData] = useState([])
+  // const [sequenceListData, setLeftSidePanelData] = useState([])
   const [noduleList, setNoduleList] = useState([])
   const [noduleMapList, setNoduleMapList] = useState([])
 
@@ -39,6 +39,22 @@ const Viewer = props => {
       imagesConfig,
     }
   }, [imagesConfig, noduleList, noduleMapList])
+
+  // useEffect(() => {
+  //   if (cornerstoneElement && currentImageIdIndex) {
+  //     const stack = {
+  //       currentImageIdIndex: currentImageIdIndex,
+  //       imageIds: nodeRef.current.imagesConfig[0],
+  //     }
+  //     debugger
+  //     cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
+  //     cornerstoneTools.addToolState(cornerstoneElement, 'stack', stack)
+  //   }
+  // }, [cornerstoneElement, currentImageIdIndex])
+
+  // queryNodeList(props.data.patientID, props.data.seriesInfo[0].seriesNo, res => {
+  //   console.log(res)
+  // })
 
   // 影像信息
   useEffect(() => {
@@ -288,6 +304,7 @@ const Viewer = props => {
 
   // 切换当前视图
   const changeActiveImage = (index, cornerstoneElement) => {
+    console.log(111)
     cornerstone.loadImage(nodeRef.current.imagesConfig[index]).then(image => {
       cornerstone.displayImage(cornerstoneElement, image)
       cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
@@ -536,17 +553,7 @@ const Viewer = props => {
       if (toolFlag) {
         setToolEnable()
         toolFlag = false
-        
-        const stack = {
-          currentImageIdIndex: index,
-          imageIds: nodeRef.current.imagesConfig,
-        }
-  
-        cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
-        cornerstoneTools.addToolState(cornerstoneElement, 'stack', stack)
-
       }
-
 
       cornerstoneTools.setToolActive('MarkNodule', { mouseButtonMask: 1 })
       cornerstoneTools.setToolActive('StackScrollMouseWheel', {})
@@ -572,6 +579,10 @@ const Viewer = props => {
       if (localStorage.getItem('active') === 'true') {
         showMarkDialog(e, cornerstoneElement)
       }
+    })
+
+    cornerstoneElement.addEventListener('cornerstonetoolsmeasurementcompleted', e => {
+      console.log(e)
     })
   }
 
@@ -608,19 +619,15 @@ const Viewer = props => {
     cornerstone.setViewport(element, viewport)
   }
 
-  const loadNodeList = () => {
-    console.log(111)
-    queryNodeList(props.data.patientID, props.data.seriesInfo[0].seriesNo, res => {
-      console.log(res)
-    })
+  const getSelectedSeries = (selectedSeries) => {
+    console.log('selectedSeries: ', selectedSeries, ', dd: ', selectedSeries.imageIDList)
   }
 
   return (
     <div className="viewer-box">
-      <button onClick={loadNodeList}>121212</button>
       <Toolbar handleToolbarClick={handleToolbarClick} setShowViewer={props.setShowViewer} />
       <div className="viewer-center-box">
-        <LeftSidePanel data={sequenceListData} />
+        <LeftSidePanel patientInfo={props.data} getSelectedSeries={getSelectedSeries}/>
         <ViewerMain
           handleToolbarClick={handleToolbarClick}
           handleElementEnabledEvt={handleElementEnabledEvt}

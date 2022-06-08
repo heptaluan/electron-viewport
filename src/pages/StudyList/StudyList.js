@@ -10,7 +10,7 @@ import {
   queryData,
   SQLContainer,
 } from '../../util/sqlite'
-import { formatFile } from '../../util/index'
+import {formatFile} from '../../util/index'
 
 const dicomColumns = [
   {
@@ -166,16 +166,40 @@ const StudyList = props => {
     queryStudyByPatientID(record.patientID, getAllByPatientID)
   }
   const studyGetAll = record => {
+    selectedData.studyInfo = record
     querySeriesByStudyID(record.studyID, seriesGetAll)
   }
-  const seriesGetAll = seriesList => {
-    selectedData.seriesInfo = Array.isArray(seriesList) ? seriesList : [seriesList]
+  const seriesGetAll = (seriesList, selectedIndex) => {
+    console.log(selectedIndex)
+    // check whether user get all series by selected from patient and study table or from series table
+    if (selectedIndex) {
+      selectedData.seriesInfo = Array.isArray(seriesData) ? seriesData : [seriesData]
+      selectedData.seriesInfo[selectedIndex].active = true
+    } else {
+      selectedData.seriesInfo = Array.isArray(seriesList) ? seriesList : [seriesList]
+      selectedData.seriesInfo[0].active = true
+    }
+    const promises = []
+    // get all imageID and bind all imageIds to series
     selectedData.seriesInfo.forEach(ele => {
       ele.imageIDList = formatFile(ele.framePath)
+      promises.push(ele.imageIDList)
     })
-    props.setData(selectedData)
-    console.log('all: ', selectedData)
-    props.setShowViewer(true)
+    Promise.all(promises).then((res) => {
+      console.log('promises:', res)
+      // check if file is inexistent when path is exists in DB
+      if (res.findIndex(x =>x == undefined) >= 0) {
+        console.log('no file be found')
+      } else {
+        // set the dcm image as cover
+        res.forEach((ele, index)=> {
+          selectedData.seriesInfo[index].cover = ele[0]
+        })
+          props.setData(selectedData)
+          console.log('all: ', selectedData)
+          props.setShowViewer(true)
+      }
+    })
   }
 
   const studyRowClicked = (record, index) => {
@@ -222,6 +246,9 @@ const StudyList = props => {
             </Button>
             <Button onClick={e => deleteTableSql('dicom_series')} type="primary">
               删除 series
+            </Button>
+            <Button onClick={e => queryData(SQLContainer.queryPatientSql, printLog)} type="primary">
+              查询 patient
             </Button>
             <Button onClick={e => queryData(SQLContainer.queryStudySql, printLog)} type="primary">
               查询 study
@@ -297,7 +324,7 @@ const StudyList = props => {
                 seriesRowClicked(record, index)
               },
               onDoubleClick: event => {
-                seriesGetAll(record)
+                seriesGetAll(record, index)
               },
             }
           }}
