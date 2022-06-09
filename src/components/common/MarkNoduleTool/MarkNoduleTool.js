@@ -53,35 +53,21 @@ export default class MarkNoduleTool extends BaseAnnotationTool {
 
   // 获取工具框选的信息
   updateCachedStats(image, element, data) {
-    const seriesModule = window.cornerstone.metaData.get('generalSeriesModule', image.imageId) ||
-      {};
-    const modality = seriesModule.modality;
-    const pixelSpacing = getPixelSpacing(image);
+    const seriesModule = window.cornerstone.metaData.get('generalSeriesModule', image.imageId) || {}
+    const modality = seriesModule.modality
+    const pixelSpacing = getPixelSpacing(image)
 
-    const stats = _calculateStats(
-      image,
-      element,
-      data.handles,
-      modality,
-      pixelSpacing
-    );
+    const stats = _calculateStats(image, element, data.handles, modality, pixelSpacing)
 
-    data.cachedStats = stats;
-    data.invalidated = false;
+    data.cachedStats = stats
+    data.invalidated = false
   }
 
   renderToolData(evt) {
     const toolData = getToolState(evt.currentTarget, this.name)
-    localStorage.setItem('active', 'false')
 
     if (!toolData) {
       return
-    }
-
-    if (toolData.data[0]) {
-      localStorage.setItem('active', 'true')
-    } else {
-      localStorage.setItem('active', 'false')
     }
 
     const eventData = evt.detail
@@ -123,25 +109,25 @@ function _getRectangleImageCoordinates(startHandle, endHandle) {
     top: Math.min(startHandle.y, endHandle.y),
     width: Math.abs(startHandle.x - endHandle.x),
     height: Math.abs(startHandle.y - endHandle.y),
-  };
+  }
 }
 
 function _calculateRectangleStats(sp, rectangle) {
-  let sum = 0;
-  let sumSquared = 0;
-  let count = 0;
-  let index = 0;
-  let min = sp ? sp[0] : null;
-  let max = sp ? sp[0] : null;
+  let sum = 0
+  let sumSquared = 0
+  let count = 0
+  let index = 0
+  let min = sp ? sp[0] : null
+  let max = sp ? sp[0] : null
 
   for (let y = rectangle.top; y < rectangle.top + rectangle.height; y++) {
     for (let x = rectangle.left; x < rectangle.left + rectangle.width; x++) {
-      sum += sp[index];
-      sumSquared += sp[index] * sp[index];
-      min = Math.min(min, sp[index]);
-      max = Math.max(max, sp[index]);
-      count++; // TODO: Wouldn't this just be sp.length?
-      index++;
+      sum += sp[index]
+      sumSquared += sp[index] * sp[index]
+      min = Math.min(min, sp[index])
+      max = Math.max(max, sp[index])
+      count++ // TODO: Wouldn't this just be sp.length?
+      index++
     }
   }
 
@@ -153,11 +139,11 @@ function _calculateRectangleStats(sp, rectangle) {
       stdDev: 0.0,
       min: 0.0,
       max: 0.0,
-    };
+    }
   }
 
-  const mean = sum / count;
-  const variance = sumSquared / count - mean * mean;
+  const mean = sum / count
+  const variance = sumSquared / count - mean * mean
 
   return {
     count,
@@ -166,15 +152,12 @@ function _calculateRectangleStats(sp, rectangle) {
     stdDev: Math.sqrt(variance),
     min,
     max,
-  };
+  }
 }
 
 function _calculateStats(image, element, handles, modality, pixelSpacing) {
   // Retrieve the bounds of the rectangle in image coordinates
-  const roiCoordinates = _getRectangleImageCoordinates(
-    handles.start,
-    handles.end
-  );
+  const roiCoordinates = _getRectangleImageCoordinates(handles.start, handles.end)
 
   // Retrieve the array of pixels that the rectangle bounds cover
   const pixels = window.cornerstone.getPixels(
@@ -183,29 +166,29 @@ function _calculateStats(image, element, handles, modality, pixelSpacing) {
     roiCoordinates.top,
     roiCoordinates.width,
     roiCoordinates.height
-  );
+  )
 
   // Calculate the mean & standard deviation from the pixels and the rectangle details
-  const roiMeanStdDev = _calculateRectangleStats(pixels, roiCoordinates);
+  const roiMeanStdDev = _calculateRectangleStats(pixels, roiCoordinates)
 
-  let meanStdDevSUV;
+  let meanStdDevSUV
 
   if (modality === 'PT') {
     meanStdDevSUV = {
       mean: calculateSUV(image, roiMeanStdDev.mean, true) || 0,
       stdDev: calculateSUV(image, roiMeanStdDev.stdDev, true) || 0,
-    };
+    }
   }
 
   // Calculate the image area from the rectangle dimensions and pixel spacing
   const area =
     roiCoordinates.width *
     (pixelSpacing.colPixelSpacing || 1) *
-    (roiCoordinates.height * (pixelSpacing.rowPixelSpacing || 1));
+    (roiCoordinates.height * (pixelSpacing.rowPixelSpacing || 1))
 
   const perimeter =
     roiCoordinates.width * 2 * (pixelSpacing.colPixelSpacing || 1) +
-    roiCoordinates.height * 2 * (pixelSpacing.rowPixelSpacing || 1);
+    roiCoordinates.height * 2 * (pixelSpacing.rowPixelSpacing || 1)
 
   return {
     area: area || 0,
@@ -217,5 +200,5 @@ function _calculateStats(image, element, handles, modality, pixelSpacing) {
     min: roiMeanStdDev.min || 0,
     max: roiMeanStdDev.max || 0,
     meanStdDevSUV,
-  };
+  }
 }

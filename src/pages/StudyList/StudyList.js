@@ -10,7 +10,7 @@ import {
   queryData,
   SQLContainer,
 } from '../../util/sqlite'
-import {formatFile} from '../../util/index'
+import { formatFile } from '../../util/index'
 
 const dicomColumns = [
   {
@@ -132,7 +132,7 @@ const StudyList = props => {
   const [selectedData, setSelectedData] = useState([])
 
   useEffect(() => {
-    console.log('t d: ', patientData)
+    // console.log('t d: ', patientData)
     queryDicomData(getDicomFromDB)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -170,7 +170,7 @@ const StudyList = props => {
     querySeriesByStudyID(record.studyID, seriesGetAll)
   }
   const seriesGetAll = (seriesList, selectedIndex) => {
-    console.log(selectedIndex)
+    // console.log(selectedIndex)
     // check whether user get all series by selected from patient and study table or from series table
     if (selectedIndex) {
       selectedData.seriesInfo = Array.isArray(seriesData) ? seriesData : [seriesData]
@@ -185,19 +185,19 @@ const StudyList = props => {
       ele.imageIDList = formatFile(ele.framePath)
       promises.push(ele.imageIDList)
     })
-    Promise.all(promises).then((res) => {
-      console.log('promises:', res)
+    Promise.all(promises).then(res => {
+      // console.log('promises:', res)
       // check if file is inexistent when path is exists in DB
-      if (res.findIndex(x =>x == undefined) >= 0) {
+      if (res.findIndex(x => x == undefined) >= 0) {
         console.log('no file be found')
       } else {
         // set the dcm image as cover
-        res.forEach((ele, index)=> {
+        res.forEach((ele, index) => {
           selectedData.seriesInfo[index].cover = ele[0]
         })
-          props.setData(selectedData)
-          console.log('all: ', selectedData)
-          props.setShowViewer(true)
+        props.setData(selectedData)
+        // console.log('all: ', selectedData)
+        props.setShowViewer(true)
       }
     })
   }
@@ -211,11 +211,11 @@ const StudyList = props => {
     // console.log('index: ', index, 'row: ', record)
   }
   const printLog = log => {
-    console.log(log)
+    // console.log(log)
   }
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
+      // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
     },
     getCheckboxProps: record => ({
       // disabled: record.name === 'Disabled User',
@@ -286,8 +286,7 @@ const StudyList = props => {
                 patientRowClicked(record)
               },
               onDoubleClick: event => {
-                
-                console.log('Patient list: ', patientData)
+                // console.log('Patient list: ', patientData)
                 patientGetAll(record)
               },
             }

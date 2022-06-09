@@ -5,7 +5,7 @@ const CustomOverlay = props => {
   return (
     <ul className="custom-overlay-box">
       <li>
-        当前帧数：<span>{props.imageIndex}</span>
+        当前帧数：<span>{props.imageIndex - 1}</span>
       </li>
       <li>
         总帧数：<span>{props.stackSize}</span>

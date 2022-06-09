@@ -11,7 +11,7 @@ import AddNoduleTool from '../../components/common/AddNoduleTool/AddNoduleTool'
 import { Modal, message } from 'antd'
 import Draggable from 'react-draggable'
 import AddNewNode from '../../components/common/AddNewNode/AddNewNode'
-import {insertData, queryNodeList, SQLContainer} from "../../util/sqlite";
+import { insertData, queryNodeList, SQLContainer } from '../../util/sqlite'
 
 const Viewer = props => {
   // 初始化
@@ -29,6 +29,9 @@ const Viewer = props => {
   // 视图元素
   const [cornerstoneElement, setCornerstoneElement] = useState(null)
 
+  // 保存 patientID
+  const [patientID, setPatientID] = useState('')
+
   // 临时变量
   const nodeRef = useRef()
 
@@ -40,25 +43,10 @@ const Viewer = props => {
     }
   }, [imagesConfig, noduleList, noduleMapList])
 
-  // useEffect(() => {
-  //   if (cornerstoneElement && currentImageIdIndex) {
-  //     const stack = {
-  //       currentImageIdIndex: currentImageIdIndex,
-  //       imageIds: nodeRef.current.imagesConfig[0],
-  //     }
-  //     debugger
-  //     cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
-  //     cornerstoneTools.addToolState(cornerstoneElement, 'stack', stack)
-  //   }
-  // }, [cornerstoneElement, currentImageIdIndex])
-
-  // queryNodeList(props.data.patientID, props.data.seriesInfo[0].seriesNo, res => {
-  //   console.log(res)
-  // })
-
-  // 影像信息
+  // 影像信息初始化
   useEffect(() => {
-    props.data.seriesInfo[0].imageIDList.then(res => {
+    const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
+    seriesInfo.imageIDList.then(res => {
       if (res.length > 0) {
         const imagesConfig = []
         for (let i = 0; i < res.length; i++) {
@@ -69,12 +57,29 @@ const Viewer = props => {
     })
   }, [props.data])
 
-  // 初始化结节信息
+  // 结节信息初始化
   useEffect(() => {
-    const data = localStorage.getItem('data')
-    formatNodeData(JSON.parse(data))
+    const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
+    const seriesNo = seriesInfo.seriesNo
+    const patientID = props.data.patientID
+    setPatientID(patientID)
+    queryNodeList(patientID, seriesNo, res => {
+      formatNodeData(res)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // 点击序列切换
+  const getSelectedSeries = selectedSeries => {
+    setCurrentImageIdIndex(0)
+    selectedSeries.imageIDList.then(res => {
+      setImagesConfig([...res])
+      const seriesNo = selectedSeries.seriesNo
+      queryNodeList(patientID, seriesNo, res => {
+        formatNodeData(res)
+      })
+    })
+  }
 
   // 启用工具
   const setToolEnable = () => {
@@ -111,12 +116,21 @@ const Viewer = props => {
 
   // 格式化结节数据
   const formatNodeData = resultInfo => {
-    if (!resultInfo) return
+    if (resultInfo.length === 0) {
+      if (cornerstoneElement) {
+        cornerstoneTools.clearToolState(cornerstoneElement, 'MarkNodule')
+        cornerstone.updateImage(cornerstoneElement)
+      }
+      setNoduleList([])
+      setNoduleMapList([])
+      return false
+    }
     const nodulesList = []
     const nodulesMapList = []
     let index = 0
     for (let i = 0; i < resultInfo.length; i++) {
       const item = resultInfo[i]
+      const nodeBox = item.nodeBox.split(',')
       nodulesList.push({
         id: index,
         checked: false,
@@ -130,7 +144,7 @@ const Viewer = props => {
         featureLabelG: item.featureLabel,
         noduleSize: item.noduleSize,
         suggest: item.suggest,
-        nodeBox: item.nodeBox,
+        nodeBox: nodeBox,
         diameter: item.diameter,
         maxHu: item.maxHu,
         minHu: item.minHu,
@@ -142,10 +156,10 @@ const Viewer = props => {
       nodulesMapList.push({
         noduleName: item.noduleName,
         index: item.imageIndex,
-        startX: item.nodeBox[0],
-        startY: item.nodeBox[1],
-        endX: item.nodeBox[2],
-        endY: item.nodeBox[3],
+        startX: nodeBox[0],
+        startY: nodeBox[1],
+        endX: nodeBox[2],
+        endY: nodeBox[3],
       })
     }
 
@@ -157,10 +171,8 @@ const Viewer = props => {
 
   // 添加结节标注
   const addNodeTool = (cornerstoneElement, index = 0) => {
-    const item = nodeRef.current.noduleMapList.filter(item => item.index === index)
+    const item = nodeRef.current.noduleMapList.filter(item => Number(item.index) === index)
     const checkItme = nodeRef.current.noduleList.find(item => item.checked === true)
-
-    console.log(nodeRef.current.noduleList)
 
     if (item.length >= 1) {
       cornerstoneTools.clearToolState(cornerstoneElement, 'MarkNodule')
@@ -304,7 +316,6 @@ const Viewer = props => {
 
   // 切换当前视图
   const changeActiveImage = (index, cornerstoneElement) => {
-    console.log(111)
     cornerstone.loadImage(nodeRef.current.imagesConfig[index]).then(image => {
       cornerstone.displayImage(cornerstoneElement, image)
       cornerstoneTools.addStackStateManager(cornerstoneElement, ['stack'])
@@ -319,11 +330,12 @@ const Viewer = props => {
 
   // 格式化提交数据
   const formatPostData = () => {
+    const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
     const item = noduleList[noduleList.length - 1]
     const postData = [
       {
         patientID: props.data.patientID,
-        seriesNo: props.data.seriesInfo[0].seriesNo,
+        seriesNo: seriesInfo.seriesNo,
         imageIndex: item.num,
         noduleName: item.noduleName,
         noduleNum: item.noduleNum,
@@ -339,16 +351,15 @@ const Viewer = props => {
         meanHu: item.meanHu,
         diameterNorm: item.diameterNorm,
         centerHu: item.centerHu,
-      }
+      },
     ]
     return postData
   }
 
   // 暂存结节数据
   const saveResults = () => {
-    debugger
     const postData = formatPostData()
-    insertData(SQLContainer.insertNodeListSql, postData);
+    insertData(SQLContainer.insertNodeListSql, postData)
     message.success(`结节结果保存成功`)
   }
 
@@ -439,6 +450,9 @@ const Viewer = props => {
     const endY = toolData.handles.end.y.toFixed(2)
     const rowPixelSpacing = cornerstone.getImage(cornerstoneElement).rowPixelSpacing
 
+    const imageId = cornerstone.getImage(cornerstoneElement).imageId
+    const imageIndex = nodeRef.current.imagesConfig.findIndex(item => item === imageId)
+
     const newNoduleList = {
       active: false,
       checked: false,
@@ -446,7 +460,7 @@ const Viewer = props => {
       lung: toolList[0].lung,
       noduleName: `nodule_${toolList[0].uuid}`,
       noduleNum: toolList[0].uuid,
-      num: currentImageIdIndex,
+      num: imageIndex,
       suggest: toolList[0].suggest,
       type: toolList[0].type,
       diameter: `${(Math.abs(endX - startX) * rowPixelSpacing).toFixed(2)}mm*${(
@@ -474,7 +488,7 @@ const Viewer = props => {
       endY: endY,
       noduleNum: toolList[0].uuid,
       noduleName: `nodule_${toolList[0].uuid}`,
-      index: currentImageIdIndex,
+      index: imageIndex,
     }
 
     noduleList.push(newNoduleList)
@@ -486,10 +500,9 @@ const Viewer = props => {
     saveResults()
 
     cornerstoneTools.clearToolState(cornerstoneElement, 'AddNodule')
-    const index = currentImageIdIndex
 
     setTimeout(() => {
-      addNodeTool(cornerstoneElement, index)
+      addNodeTool(cornerstoneElement, imageIndex)
     }, 500)
 
     setModalVisible(false)
@@ -520,7 +533,6 @@ const Viewer = props => {
     const tool = cornerstoneTools.getToolState(cornerstoneElement, 'AddNodule')
     let mark = document.getElementById('mark')
     if (tool && mark && mark.classList.contains('active')) {
-      console.log(tool)
       const newToolData = [...tool.data]
       const toolData = newToolData.pop()
       formatNewNodeData(toolData)
@@ -531,7 +543,6 @@ const Viewer = props => {
   // 工具操作函数
   const handleCloseCallback = () => {
     const tool = cornerstoneTools.getToolState(cornerstoneElement, 'AddNodule')
-    console.log(tool)
     const toolData = tool.data.pop()
     cornerstoneTools.removeToolState(cornerstoneElement, 'AddNodule', toolData)
     cornerstone.updateImage(cornerstoneElement)
@@ -543,7 +554,6 @@ const Viewer = props => {
     const cornerstoneElement = elementEnabledEvt.detail.element
     setCornerstoneElement(cornerstoneElement)
 
-    let windowFlag = true
     let toolFlag = true
 
     cornerstoneElement.addEventListener('cornerstonenewimage', newImage => {
@@ -568,21 +578,17 @@ const Viewer = props => {
     //   console.log(1)
     // })
 
-    cornerstoneElement.addEventListener('cornerstoneimagerendered', imageRenderedEvent => {
-      if (windowFlag) {
-        windowChange(cornerstoneElement, imageRenderedEvent.detail.image, 2)
-        windowFlag = false
-      }
-    })
-
-    cornerstoneElement.addEventListener('cornerstonetoolsmouseup', e => {
-      if (localStorage.getItem('active') === 'true') {
-        showMarkDialog(e, cornerstoneElement)
-      }
-    })
+    // cornerstoneElement.addEventListener('cornerstoneimagerendered', imageRenderedEvent => {
+    //   const curImageId = imageRenderedEvent.detail.image.imageId
+    //   const index = imagesConfig.findIndex(item => item === curImageId)
+    //   setCurrentImageIdIndex(index)
+    // })
 
     cornerstoneElement.addEventListener('cornerstonetoolsmeasurementcompleted', e => {
-      console.log(e)
+      const tool = cornerstoneTools.getToolState(cornerstoneElement, 'AddNodule')
+      if (tool) {
+        showMarkDialog(e, cornerstoneElement)
+      }
     })
   }
 
@@ -619,21 +625,17 @@ const Viewer = props => {
     cornerstone.setViewport(element, viewport)
   }
 
-  const getSelectedSeries = (selectedSeries) => {
-    console.log('selectedSeries: ', selectedSeries, ', dd: ', selectedSeries.imageIDList)
-  }
-
   return (
     <div className="viewer-box">
       <Toolbar handleToolbarClick={handleToolbarClick} setShowViewer={props.setShowViewer} />
       <div className="viewer-center-box">
-        <LeftSidePanel patientInfo={props.data} getSelectedSeries={getSelectedSeries}/>
+        <LeftSidePanel patientInfo={props.data} getSelectedSeries={getSelectedSeries} />
         <ViewerMain
           handleToolbarClick={handleToolbarClick}
           handleElementEnabledEvt={handleElementEnabledEvt}
           imagesConfig={imagesConfig}
           noduleList={noduleList}
-          imageIdIndex={currentImageIdIndex}
+          imageIdIndex={Number(currentImageIdIndex)}
         />
         <div className="middle-box-wrap">
           <MiddleSidePanel

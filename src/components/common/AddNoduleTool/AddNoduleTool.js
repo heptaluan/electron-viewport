@@ -65,16 +65,9 @@ export default class AddNoduleTool extends BaseAnnotationTool {
 
   renderToolData(evt) {
     const toolData = getToolState(evt.currentTarget, this.name)
-    localStorage.setItem('active', 'false')
 
     if (!toolData) {
       return
-    }
-
-    if (toolData.data[0]) {
-      localStorage.setItem('active', 'true')
-    } else {
-      localStorage.setItem('active', 'false')
     }
 
     const eventData = evt.detail
