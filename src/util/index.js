@@ -53,7 +53,6 @@ export const formatFile = async fileList => {
       console.log(fileList[i], ' not exists!!!')
       return
     }
-
   }
   return imagesIDConfig
 }

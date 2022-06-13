@@ -182,6 +182,9 @@ const Toolbar = props => {
         </div>
       </div>
       <div className="show-modal">
+        <Button onClick={props.handleExportExcel} style={{ marginRight: 15 }}>
+          导出结节信息
+        </Button>
         <Button onClick={() => setVisible(true)}>查看头信息</Button>
       </div>
 

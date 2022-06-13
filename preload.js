@@ -19,3 +19,4 @@ window.sqlite = sqlite
 window.rootPath = rootPath
 window.join = join
 console.log('this is preload')
+console.log(__dirname)

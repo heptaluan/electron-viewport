@@ -56,17 +56,14 @@ export const ViewerThumbnail = props => {
   // console.log('props:', props)
   return (
     <div>
-      <div className="image-thumbnail-canvas">
-        <canvas
-          ref={canvasRef}
-          style={{
-            minWidth: '100%',
-            minHeight: '120px',
-            flex: '1',
-          }}
-        />
-        {isLoading && <div className="image-thumbnail-loading-indicator"></div>}
-      </div>
+        <div className="image-thumbnail-canvas">
+            <canvas ref={canvasRef} style={{
+                minWidth: '100%',
+                minHeight: '100px',
+                flex: '1',
+            }} />
+            {isLoading && <div className="image-thumbnail-loading-indicator"></div>}
+        </div>
     </div>
   )
 }

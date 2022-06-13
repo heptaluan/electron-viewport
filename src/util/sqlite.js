@@ -109,10 +109,26 @@ export const SQLContainer = {
   insertNodeListSql:
     'insert into node_list(patientID, seriesNo, imageIndex, noduleName, noduleNum, lungLocation, lobeLocation, featureLabel, noduleSize, suggest, nodeBox, diameter, maxHu, minHu, meanHu, diameterNorm, centerHu ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
   queryNodeListSql: 'select * from node_list',
+
+  removePatientDuplicated: 'delete from dicom_patient where dicom_patient.rowid not in (select MAX(dicom_patient.rowid) from dicom_patient group by key, patientID)',
+  removeStudyDuplicated: 'delete from dicom_study where dicom_study.rowid not in (select MAX(dicom_study.rowid) from dicom_study group by key, studyID)',
+  removeSeriesDuplicated: 'delete from dicom_series where dicom_series.rowid not in (select MAX(dicom_series.rowid) from dicom_series group by key, seriesNo)'
+}
+export const removeAllDuplicated = (patientCallback) => {
+  queryData(SQLContainer.removePatientDuplicated,(res1) => {
+    queryData(SQLContainer.removeStudyDuplicated,(res2) => {
+      queryData(SQLContainer.removeSeriesDuplicated,(res3)=> {
+        queryData(SQLContainer.queryPatientSql,patientCallback)
+        // queryData(SQLContainer.queryStudySql,studyCallback)
+        // queryData(SQLContainer.querySeriesSql,seriesCallback)
+      } )
+    })
+  })
 }
 
-export const queryDicomData = DBFunction => {
-  queryData(SQLContainer.queryPatientSql, DBFunction)
+export const queryPatientData = (DBFunction, patientID) => {
+  const sql = patientID ? ` where patientID ='${patientID}'`: ''
+  queryData(SQLContainer.queryPatientSql + sql, DBFunction)
 }
 
 export const queryStudyByPatientID = (patientID, DBFunction) => {
@@ -130,7 +146,14 @@ export const queryNodeList = (patientID, seriesNo, callback) => {
   queryData(SQLContainer.queryNodeListSql + sql, callback)
 }
 
+export const queryAllNodeList = (patientID, callback) => {
+  const sql = ` where patientID = '${patientID}'`
+  queryData(SQLContainer.queryNodeListSql + sql, callback)
+}
+
 createTable(SQLContainer.dicomPatientSql)
 createTable(SQLContainer.dicomStudySql)
 createTable(SQLContainer.dicomSeriesSql)
 createTable(SQLContainer.nodeListSql)
+
+

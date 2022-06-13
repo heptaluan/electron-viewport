@@ -11,7 +11,8 @@ import AddNoduleTool from '../../components/common/AddNoduleTool/AddNoduleTool'
 import { Modal, message } from 'antd'
 import Draggable from 'react-draggable'
 import AddNewNode from '../../components/common/AddNewNode/AddNewNode'
-import { insertData, queryNodeList, SQLContainer } from '../../util/sqlite'
+import { insertData, queryNodeList, SQLContainer, queryAllNodeList } from '../../util/sqlite'
+import * as XLSX from 'xlsx'
 
 const Viewer = props => {
   // 初始化
@@ -165,6 +166,63 @@ const Viewer = props => {
 
     setNoduleList([...nodulesList])
     setNoduleMapList([...nodulesMapList])
+  }
+
+  // 导出结节信息
+  const handleExportExcel = () => {
+    queryAllNodeList(patientID, res => {
+      if (res.length === 0) {
+        message.warn(`当前病人暂无结节信息`)
+        return false
+      }
+
+      const fileName = 'test'
+      const sheet = XLSX.utils.json_to_sheet(res)
+
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, sheet, fileName)
+      const workbookBlob = workbook2blob(wb)
+      openDownload(workbookBlob, `${fileName}.xls`)
+    })
+  }
+
+  // 创建 blobUrl，通过 createObjectURL 实现下载
+  const openDownload = (blob, fileName) => {
+    if (typeof blob === 'object' && blob instanceof Blob) {
+      blob = URL.createObjectURL(blob)
+    }
+    const aLink = document.createElement('a')
+    aLink.href = blob
+    aLink.download = fileName || ''
+    let event
+    if (window.MouseEvent) event = new MouseEvent('click')
+    else {
+      event = document.createEvent('MouseEvents')
+      event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+    }
+    aLink.dispatchEvent(event)
+  }
+
+  // 将 workbook 转化为 blob 对象
+  const workbook2blob = workbook => {
+    const wopts = {
+      bookType: 'xlsx',
+      bookSST: false,
+      type: 'binary',
+    }
+    const wbout = XLSX.write(workbook, wopts)
+    const blob = new Blob([s2ab(wbout)], {
+      type: 'application/octet-stream',
+    })
+    return blob
+  }
+
+  // 将字符串转ArrayBuffer
+  const s2ab = s => {
+    const buf = new ArrayBuffer(s.length)
+    const view = new Uint8Array(buf)
+    for (let i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xff
+    return buf
   }
 
   // ===========================================================
@@ -423,22 +481,22 @@ const Viewer = props => {
   }
 
   const handleOk = e => {
-    // for (let i = 0; i < toolList.length; i++) {
-    //   if (!toolList[i].lung) {
-    //     message.warn(`请选择所有结节的肺属性后在进行新增`)
-    //     return false
-    //   }
+    for (let i = 0; i < toolList.length; i++) {
+      if (!toolList[i].lung) {
+        message.warn(`请选择结节的肺属性后在进行新增`)
+        return false
+      }
 
-    //   if (!toolList[i].lobe) {
-    //     message.warn(`请选择所有结节的肺叶属性后在进行新增`)
-    //     return false
-    //   }
+      if (!toolList[i].lobe) {
+        message.warn(`请选择结节的肺叶属性后在进行新增`)
+        return false
+      }
 
-    //   if (!toolList[i].type) {
-    //     message.warn(`请选择所有结节的类型属性后在进行新增`)
-    //     return false
-    //   }
-    // }
+      if (!toolList[i].type) {
+        message.warn(`请选择结节的类型属性后在进行新增`)
+        return false
+      }
+    }
 
     const tool = cornerstoneTools.getToolState(cornerstoneElement, 'AddNodule')
     const newToolData = [...tool.data]
@@ -470,7 +528,7 @@ const Viewer = props => {
       minHu: toolList[0].cachedStats.min,
       meanHu: toolList[0].cachedStats.mean.toFixed(2),
       diameterNorm: Math.sqrt(toolList[0].cachedStats.area).toFixed(2),
-      noduleSize: (Math.sqrt(toolList[0].cachedStats.area) / 2).toFixed(2),
+      noduleSize: (Math.pow(Math.sqrt(toolList[0].cachedStats.area) / 2, 3) * Math.PI).toFixed(2),
       centerHu: cornerstone.getPixels(
         cornerstoneElement,
         (Number(startX) + Number(endX)) / 2,
@@ -627,7 +685,11 @@ const Viewer = props => {
 
   return (
     <div className="viewer-box">
-      <Toolbar handleToolbarClick={handleToolbarClick} setShowViewer={props.setShowViewer} />
+      <Toolbar
+        handleExportExcel={handleExportExcel}
+        handleToolbarClick={handleToolbarClick}
+        setShowViewer={props.setShowViewer}
+      />
       <div className="viewer-center-box">
         <LeftSidePanel patientInfo={props.data} getSelectedSeries={getSelectedSeries} />
         <ViewerMain

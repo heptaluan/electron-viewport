@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import './StudyList.scss'
-import { Table, Input, Button } from 'antd'
+import { Table, Input, Button, Spin } from 'antd'
 import SelectFile from '../../components/SelectFile/SelectFile'
 import {
   queryStudyByPatientID,
   querySeriesByStudyID,
-  queryDicomData,
+  queryPatientData,
   deleteTableSql,
   queryData,
-  SQLContainer,
+  SQLContainer, removeAllDuplicated,
 } from '../../util/sqlite'
 import { formatFile } from '../../util/index'
 
@@ -40,6 +40,8 @@ const dicomColumns = [
   {
     title: '添加时间',
     dataIndex: 'addTime',
+    defaultSortOrder: 'descend',
+    sorter: (a, b) => new Date(a.addTime) - new Date(b.addTime),
   },
   {
     title: '上次修改时间',
@@ -75,6 +77,8 @@ const testColumns = [
   {
     title: '添加时间',
     dataIndex: 'addTime',
+    defaultSortOrder: 'descend',
+    sorter: (a, b) => new Date(a.addTime) - new Date(b.addTime),
   },
 ]
 
@@ -106,6 +110,8 @@ const listColumns = [
   {
     title: '添加时间',
     dataIndex: 'acquisitionDate',
+    defaultSortOrder: 'descend',
+    sorter: (a, b) => new Date(a.acquisitionDate) - new Date(b.acquisitionDate),
   },
 ]
 
@@ -130,21 +136,27 @@ const StudyList = props => {
   const [seriesData, setSeriesData] = useState([])
   const [DICOMFiles, importDICOM] = useState([])
   const [selectedData, setSelectedData] = useState([])
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
-    // console.log('t d: ', patientData)
-    queryDicomData(getDicomFromDB)
+    console.log('t d: ', patientData)
+    queryPatientData(getDicomFromDB)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getDicomFromDB = objects => {
     setPatientData(objects)
   }
+  const addDicomFromUpload = objects => {
+    setPatientData(patientData.concat(objects))
+  }
+
   const getStudyFromDB = objects => {
     setStudyData(objects)
   }
   const getSeriesFromDB = objects => {
     setSeriesData(objects)
+    setLoading(false)
   }
 
   const patientRowClicked = record => {
@@ -223,112 +235,131 @@ const StudyList = props => {
       name: record.name,
     }),
   }
+  const removeDuplicates = () => {
+    removeAllDuplicated(getDicomFromDB)
+    // 关闭study 和series列表，需要手动打开
+    getStudyFromDB([])
+    getSeriesFromDB([])
+  }
 
   return (
     <div className="study-list-container">
-      <SelectFile importDICOM={importDICOM} setPatientData={setPatientData} setData={props.setData} />
-      <div className="search-box-wrap">
-        <div className="search-box">
-          <div className="search-group">
-            <span>姓名：</span>
-            <Input style={{ width: 200 }} placeholder="请输入姓名" />
-          </div>
-          <div className="search-btns">
-            <Button type="primary">检索</Button>
-            <Button onClick={e => props.setShowViewer(true)} type="primary">
-              重置
-            </Button>
-            <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
-              删除 patient
-            </Button>
-            <Button onClick={e => deleteTableSql('dicom_study')} type="primary">
-              删除 study
-            </Button>
-            <Button onClick={e => deleteTableSql('dicom_series')} type="primary">
-              删除 series
-            </Button>
-            <Button onClick={e => queryData(SQLContainer.queryPatientSql, printLog)} type="primary">
-              查询 patient
-            </Button>
-            <Button onClick={e => queryData(SQLContainer.queryStudySql, printLog)} type="primary">
-              查询 study
-            </Button>
-            <Button onClick={e => queryData(SQLContainer.querySeriesSql, printLog)} type="primary">
-              查询 series
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div className="table-box">
-        <header>导入记录</header>
-        <Table
-          columns={importFilesColumns}
-          dataSource={DICOMFiles}
-          onRow={record => {
-            return {
-              onClick: event => {},
-              onDoubleClick: event => {},
-            }
-          }}
-        />
-      </div>
-      <div className="table-box">
-        <header>DICOM记录</header>
-        <Table
-          rowSelection={{
-            ...rowSelection,
-          }}
-          columns={dicomColumns}
-          dataSource={patientData}
-          onRow={record => {
-            return {
-              onClick: () => {
-                patientRowClicked(record)
-              },
-              onDoubleClick: event => {
-                // console.log('Patient list: ', patientData)
-                patientGetAll(record)
-              },
-            }
-          }}
-        />
-      </div>
-      <div className="table-box">
-        <header>检测记录</header>
-        <Table
-          columns={testColumns}
-          dataSource={studyData}
-          onRow={(record, index) => {
-            return {
-              onClick: () => {
-                studyRowClicked(record, index)
-              },
-              onDoubleClick: event => {
-                // history.push(`/viewer/${record.PatientID}`)
-                // console.log('Study list: ', patientData)
-                studyGetAll(record)
-              },
-            }
-          }}
-        />
-      </div>
-      <div className="table-box">
-        <header>序列清单</header>
-        <Table
-          columns={listColumns}
-          dataSource={seriesData}
-          onRow={(record, index) => {
-            return {
-              onClick: () => {
-                seriesRowClicked(record, index)
-              },
-              onDoubleClick: event => {
-                seriesGetAll(record, index)
-              },
-            }
-          }}
-        />
-      </div>
+      {
+        isLoading ? <div className="mask">
+          <Spin size="large" />
+        </div> : null
+      }
+      <div>
+              <SelectFile importDICOM={importDICOM} setPatientData={setPatientData} setData={props.setData}
+                          setLoading={setLoading}
+                          addDicomFromUpload={addDicomFromUpload} removeDuplicates={removeDuplicates}/>
+              <div className="search-box-wrap">
+                <div className="search-box">
+                  <div className="search-group">
+                    <span>姓名：</span>
+                    <Input style={{ width: 200 }} placeholder="请输入姓名" />
+                  </div>
+                  <div className="search-btns">
+                    <Button type="primary">检索</Button>
+                    <Button onClick={e => props.setShowViewer(true)} type="primary">
+                      重置
+                    </Button>
+                    <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
+                      删除 patient
+                    </Button>
+                    <Button onClick={e => deleteTableSql('dicom_study')} type="primary">
+                      删除 study
+                    </Button>
+                    <Button onClick={e => deleteTableSql('dicom_series')} type="primary">
+                      删除 series
+                    </Button>
+                    <Button onClick={e => queryData(SQLContainer.queryPatientSql, printLog)} type="primary">
+                      查询 patient
+                    </Button>
+                    <Button onClick={e => queryData(SQLContainer.queryStudySql, printLog)} type="primary">
+                      查询 study
+                    </Button>
+                    <Button onClick={e => queryData(SQLContainer.querySeriesSql, printLog)} type="primary">
+                      查询 series
+                    </Button>
+                    <Button onClick={e => removeDuplicates } type="primary">
+                      去重 Patient
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              {/*<div className="table-box">*/}
+              {/*  <header>导入记录</header>*/}
+              {/*  <Table*/}
+              {/*      columns={importFilesColumns}*/}
+              {/*      dataSource={DICOMFiles}*/}
+              {/*      onRow={record => {*/}
+              {/*        return {*/}
+              {/*          onClick: event => {},*/}
+              {/*          onDoubleClick: event => {},*/}
+              {/*        }*/}
+              {/*      }}*/}
+              {/*  />*/}
+              {/*</div>*/}
+              <div className="table-box">
+                <header>病人列表</header>
+                <Table
+                    rowSelection={{
+                      ...rowSelection,
+                    }}
+                    columns={dicomColumns}
+                    dataSource={patientData}
+                    onRow={record => {
+                      return {
+                        onClick: () => {
+                          patientRowClicked(record)
+                        },
+                        onDoubleClick: event => {
+
+                          console.log('Patient list: ', patientData)
+                          patientGetAll(record)
+                        },
+                      }
+                    }}
+                />
+              </div>
+              <div className="table-box">
+                <header>检测记录</header>
+                <Table
+                    columns={testColumns}
+                    dataSource={studyData}
+                    onRow={(record, index) => {
+                      return {
+                        onClick: () => {
+                          studyRowClicked(record, index)
+                        },
+                        onDoubleClick: event => {
+                          // history.push(`/viewer/${record.PatientID}`)
+                          // console.log('Study list: ', patientData)
+                          studyGetAll(record)
+                        },
+                      }
+                    }}
+                />
+              </div>
+              <div className="table-box">
+                <header>序列清单</header>
+                <Table
+                    columns={listColumns}
+                    dataSource={seriesData}
+                    onRow={(record, index) => {
+                      return {
+                        onClick: () => {
+                          seriesRowClicked(record, index)
+                        },
+                        onDoubleClick: event => {
+                          seriesGetAll(record, index)
+                        },
+                      }
+                    }}
+                />
+              </div>
+            </div>
     </div>
   )
 }

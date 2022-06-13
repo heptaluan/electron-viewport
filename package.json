@@ -1,8 +1,10 @@
 {
   "name": "viewport",
-  "main": "./main.js",
+  "main": "main.js",
   "version": "0.1.0",
   "private": true,
+  "author": "tailai",
+  "homepage": "./",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -25,7 +27,8 @@
     "react-router-dom": "^5.2.1",
     "react-scripts": "4.0.3",
     "sqlite3": "^5.0.8",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "xlsx": "^0.16.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,7 +36,18 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron:dev": "electron . dev",
-    "electron": "electron ."
+    "electron": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "extends": null,
+    "appId": "com.xxx.app",
+    "mac": {
+      "target": ["dmg","zip"]
+    },
+    "win": {
+      "target": ["nsis","zip"]
+      }
   },
   "eslintConfig": {
     "extends": [
@@ -54,6 +68,7 @@
     ]
   },
   "devDependencies": {
-    "electron": "^18.2.0"
+    "electron": "^18.2.0",
+    "electron-builder": "^23.0.3"
   }
 }
