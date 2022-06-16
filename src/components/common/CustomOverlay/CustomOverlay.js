@@ -4,14 +4,11 @@ import cornerstone from 'cornerstone-core'
 import { dicomDateTimeToLocale } from '../../../util/index'
 
 const CustomOverlay = props => {
-  // console.log(cornerstone.getImage(document.querySelector('.viewport-element')))
-  // console.log(props)
 
   const [data, setData] = useState(null)
 
   useEffect(() => {
     cornerstone.loadImage(props.imageId).then(image => {
-      console.log(image)
       const data = {
         name: image.data.string('x00100010'),
         birth: image.data.string('x00100030'),

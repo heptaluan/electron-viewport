@@ -176,8 +176,19 @@ const Viewer = props => {
         return false
       }
 
+      const exportData = []
+
+      for (let i = 0; i < res.length; i++) {
+        exportData.push({
+          patientID: res[i].patientID,
+          seriesNo: res[i].seriesNo,
+          imageIndex: res[i].imageIndex,
+          nodeBox: res[i].nodeBox
+        })
+      }
+
       const fileName = 'test'
-      const sheet = XLSX.utils.json_to_sheet(res)
+      const sheet = XLSX.utils.json_to_sheet(exportData)
 
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, sheet, fileName)

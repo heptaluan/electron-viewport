@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import './ModalContent.scss'
 import { readFileInfo, dicomDateTimeToLocale, dicomTimeToLocale } from '../../util'
 import { Descriptions } from 'antd'
 
 const ModalContent = props => {
   let selectedPath = null
-  console.log('props: ', props.globalData)
 
   for (let i = 0; i < props.globalData.seriesInfo.length; i++) {
     if (props.globalData.seriesInfo[i].active) {
@@ -15,7 +14,6 @@ const ModalContent = props => {
   const info = readFileInfo(selectedPath)
   const dict = info['dict']
   const meta = info['meta']
-  console.log('info: ', info)
 
   const textFormat = txt => {
     if (txt) {

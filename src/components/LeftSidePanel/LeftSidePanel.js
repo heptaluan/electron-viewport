@@ -5,13 +5,9 @@ import { Tag } from 'antd'
 import { ViewerThumbnail } from '../ViewerMain/ViewerMain'
 
 const LeftSidePanel = props => {
-  // console.log('p: ', props)
   const [thumbnailList, setThumbnailList] = useState([])
   useEffect(() => {
-    // console.log('update: ', props.patientInfo.seriesInfo)
     let tempList = [...props.patientInfo.seriesInfo]
-    // tempList[0].active = true
-    // tempList.sort((a,b) => new Date(b['acquisitionDate']) -  new Date(a['acquisitionDate']))
     setThumbnailList(tempList)
   }, [props.patientInfo.seriesInfo])
 
@@ -26,7 +22,6 @@ const LeftSidePanel = props => {
     },
   }
 
-  // console.log('left all seriesInfo: ', props.patientInfo.seriesInfo)
   return (
     <div className="left-side-panel-box">
       <div className="list-box-wrap">

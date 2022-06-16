@@ -3,34 +3,30 @@ const path = window.path
 const dbSlot = 'resources/'
 // const appRemote = window.appRemote
 const resourceDir = path.resolve(dbSlot)
-const dbDir = path.resolve(dbSlot +  'db')
+const dbDir = path.resolve(dbSlot + 'db')
 const filePath = window.join(dbDir, 'dicom.db')
 const sqlite = window.sqlite.verbose()
 const resourceExists = fs.existsSync(resourceDir)
 const exists = fs.existsSync(dbDir)
-console.log('resourceDir: ',resourceDir)
+console.log('resourceDir: ', resourceDir)
 
-let needInit = false
 // 如果不存在则创建
 if (!resourceExists) {
   fs.mkdirSync(resourceDir)
-  console.log('resourceDir: ',resourceDir)
+  console.log('resourceDir: ', resourceDir)
 }
 if (!exists) {
   // console.log(dbDir)
   fs.mkdirSync(dbDir)
-  console.log('dbDir: ',dbDir)
+  console.log('dbDir: ', dbDir)
 }
 
 // 是否存在db文件
 if (!fs.existsSync(filePath)) {
   fs.openSync(filePath, 'w')
-  // 初始化数据库
-  needInit = true
 }
 
 const sqlite3 = new sqlite.Database(filePath)
-// console.log(appRemote.getPath('userData'))
 
 export const createTable = function (sql) {
   sqlite3.serialize(function () {
@@ -47,8 +43,6 @@ export const createTable = function (sql) {
 export const insertData = (sql, objects, callback) => {
   sqlite3.serialize(function () {
     const stmt = sqlite3.prepare(sql)
-    // debugger
-    // console.log(objects)
     for (let i = 0; i < objects.length; ++i) {
       const temp = []
       for (const k in objects[i]) {
