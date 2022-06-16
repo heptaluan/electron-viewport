@@ -1,13 +1,27 @@
 const fs = window.fs
-const dbDir = window.join(window.rootPath, '/db')
+const path = window.path
+const dbSlot = 'resources/'
+// const appRemote = window.appRemote
+const resourceDir = path.resolve(dbSlot)
+const dbDir = path.resolve(dbSlot +  'db')
 const filePath = window.join(dbDir, 'dicom.db')
 const sqlite = window.sqlite.verbose()
+const resourceExists = fs.existsSync(resourceDir)
 const exists = fs.existsSync(dbDir)
+console.log('resourceDir: ',resourceDir)
+
 let needInit = false
 // 如果不存在则创建
-if (!exists) {
-  fs.mkdirSync(dbDir)
+if (!resourceExists) {
+  fs.mkdirSync(resourceDir)
+  console.log('resourceDir: ',resourceDir)
 }
+if (!exists) {
+  // console.log(dbDir)
+  fs.mkdirSync(dbDir)
+  console.log('dbDir: ',dbDir)
+}
+
 // 是否存在db文件
 if (!fs.existsSync(filePath)) {
   fs.openSync(filePath, 'w')
@@ -16,6 +30,7 @@ if (!fs.existsSync(filePath)) {
 }
 
 const sqlite3 = new sqlite.Database(filePath)
+// console.log(appRemote.getPath('userData'))
 
 export const createTable = function (sql) {
   sqlite3.serialize(function () {
@@ -110,24 +125,27 @@ export const SQLContainer = {
     'insert into node_list(patientID, seriesNo, imageIndex, noduleName, noduleNum, lungLocation, lobeLocation, featureLabel, noduleSize, suggest, nodeBox, diameter, maxHu, minHu, meanHu, diameterNorm, centerHu ) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
   queryNodeListSql: 'select * from node_list',
 
-  removePatientDuplicated: 'delete from dicom_patient where dicom_patient.rowid not in (select MAX(dicom_patient.rowid) from dicom_patient group by key, patientID)',
-  removeStudyDuplicated: 'delete from dicom_study where dicom_study.rowid not in (select MAX(dicom_study.rowid) from dicom_study group by key, studyID)',
-  removeSeriesDuplicated: 'delete from dicom_series where dicom_series.rowid not in (select MAX(dicom_series.rowid) from dicom_series group by key, seriesNo)'
+  removePatientDuplicated:
+    'delete from dicom_patient where dicom_patient.rowid not in (select MAX(dicom_patient.rowid) from dicom_patient group by key, patientID)',
+  removeStudyDuplicated:
+    'delete from dicom_study where dicom_study.rowid not in (select MAX(dicom_study.rowid) from dicom_study group by key, studyID)',
+  removeSeriesDuplicated:
+    'delete from dicom_series where dicom_series.rowid not in (select MAX(dicom_series.rowid) from dicom_series group by key, seriesNo)',
 }
-export const removeAllDuplicated = (patientCallback) => {
-  queryData(SQLContainer.removePatientDuplicated,(res1) => {
-    queryData(SQLContainer.removeStudyDuplicated,(res2) => {
-      queryData(SQLContainer.removeSeriesDuplicated,(res3)=> {
-        queryData(SQLContainer.queryPatientSql,patientCallback)
+export const removeAllDuplicated = patientCallback => {
+  queryData(SQLContainer.removePatientDuplicated, res1 => {
+    queryData(SQLContainer.removeStudyDuplicated, res2 => {
+      queryData(SQLContainer.removeSeriesDuplicated, res3 => {
+        queryData(SQLContainer.queryPatientSql, patientCallback)
         // queryData(SQLContainer.queryStudySql,studyCallback)
         // queryData(SQLContainer.querySeriesSql,seriesCallback)
-      } )
+      })
     })
   })
 }
 
 export const queryPatientData = (DBFunction, patientID) => {
-  const sql = patientID ? ` where patientID ='${patientID}'`: ''
+  const sql = patientID ? ` where patientID ='${patientID}'` : ''
   queryData(SQLContainer.queryPatientSql + sql, DBFunction)
 }
 
@@ -155,5 +173,3 @@ createTable(SQLContainer.dicomPatientSql)
 createTable(SQLContainer.dicomStudySql)
 createTable(SQLContainer.dicomSeriesSql)
 createTable(SQLContainer.nodeListSql)
-
-

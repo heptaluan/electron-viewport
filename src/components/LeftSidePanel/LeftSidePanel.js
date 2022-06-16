@@ -9,8 +9,9 @@ const LeftSidePanel = props => {
   const [thumbnailList, setThumbnailList] = useState([])
   useEffect(() => {
     // console.log('update: ', props.patientInfo.seriesInfo)
-    const tempList = [...props.patientInfo.seriesInfo]
+    let tempList = [...props.patientInfo.seriesInfo]
     // tempList[0].active = true
+    // tempList.sort((a,b) => new Date(b['acquisitionDate']) -  new Date(a['acquisitionDate']))
     setThumbnailList(tempList)
   }, [props.patientInfo.seriesInfo])
 

@@ -2,9 +2,8 @@ import React from 'react'
 import './SelectFile.scss'
 import * as path from "path";
 import { Button } from 'antd'
-import dcmjs from 'dcmjs'
 import cornerstone from 'cornerstone-core'
-import {addDicomFile, dicomDateTimeToLocale} from "../../util";
+import {readFileInfo, addDicomFile, dicomDateTimeToLocale, keyFormat} from "../../util";
 import {insertData, SQLContainer} from "../../util/sqlite";
 
 const SelectFile = (props) => {
@@ -21,7 +20,7 @@ const SelectFile = (props) => {
     const creatPatient = (dict, time) => {
         patientList.push(
             {
-                key: dict['00100020'].Value[0] + ' '+ dicomDateTimeToLocale(dict['00080022'].Value[0] + '.' + dict['00080032'].Value[0]),
+                key: keyFormat(dict['00100020'].Value[0] + '_'+ dict['00080022'].Value[0]),
                 patientName: dict['00100010'].Value[0],
                 patientID: dict['00100020'].Value[0],
                 patientGender: dict['00100040'].Value[0],
@@ -38,7 +37,7 @@ const SelectFile = (props) => {
     }
     const createStudy = (dict, time) => {
         studyList.push({
-            key: dict['00100020'].Value[0] + ' ' + dict['00200010'].Value[0],
+            key: dict['00100020'].Value[0] + '_' + dict['00200010'].Value[0],
             patientID: dict['00100020'].Value[0],
             acquisitionDate:  dicomDateTimeToLocale(dict['00080022'].Value[0] + '.' + dict['00080032'].Value[0]),
             seriesInfo: [],
@@ -50,7 +49,7 @@ const SelectFile = (props) => {
     }
     const createSeries = (dict, time) => {
         seriesList.push( {
-            key: dict['00100020'].Value[0] + ' ' + dict['00200011'].Value[0],
+            key: dict['00100020'].Value[0] + '_' + dict['00200011'].Value[0],
             studyID: dict['00200010'].Value[0],
             seriesNo: dict['00200011'].Value[0],
             seriesDescription: dict['0008103E'].Value[0],
@@ -70,10 +69,10 @@ const SelectFile = (props) => {
             frameNum: 0
         })
     }
-    const readFileInfo = (file) => {
+
+    const createDataTables= (file) => {
         const now = new Date().toLocaleString()
-        const arrayBuffer = window.fs.readFileSync(file.path).buffer;
-        const dicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer)
+        const dicomDict = readFileInfo(file)
         // console.log('dict: ',dicomDict)
         const dict = dicomDict['dict']
         indexKey++
@@ -164,7 +163,7 @@ const SelectFile = (props) => {
                         resolve(file)
                     } else {
                         resolve(null)
-                        console.log(file.name,' is not dicn=m')
+                        console.log(file.name,' is not dicom')
                     }
                 }
             }
@@ -193,7 +192,7 @@ const SelectFile = (props) => {
                     // console.log(res,',',dicmBox)
                     if (dicmBox.length > 0) {
                         dicmBox.forEach(ele => {
-                            readFileInfo(ele)
+                            createDataTables(ele)
                         })
                         DicomBuilder()
                         console.log('list: ', patientList, ', d: ', studyList,', s: ', seriesList)

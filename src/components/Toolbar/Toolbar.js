@@ -194,10 +194,10 @@ const Toolbar = props => {
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
-        width={1000}
+        width={600}
         footer={null}
       >
-        <ModalContent />
+        <ModalContent globalData={props.globalData} />
       </Modal>
     </ul>
   )

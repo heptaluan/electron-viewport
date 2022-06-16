@@ -1,9 +1,12 @@
 // 预加载脚本在渲染器进程加载之前加载，并有权访问两个 渲染器全局 (例如 window 和 document) 和 Node.js 环境
-const {join} = require('path')
+const path = require('path')
 const fs = require('fs')
 const sqlite = require('sqlite3')
-const rootPath = join(__dirname, 'src');
+const rootPath = path.join(__dirname, 'src')
 
+console.log('rootPath: ',rootPath)
+
+// console.log('rootPath: ',rootPath)
 window.addEventListener('DOMContentLoaded', () => {
   const replaceText = (selector, text) => {
     const element = document.getElementById(selector)
@@ -17,6 +20,5 @@ window.addEventListener('DOMContentLoaded', () => {
 window.fs = fs
 window.sqlite = sqlite
 window.rootPath = rootPath
-window.join = join
-console.log('this is preload')
-console.log(__dirname)
+window.join = path.join
+window.path = path

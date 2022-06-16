@@ -28,7 +28,7 @@
     "react-scripts": "4.0.3",
     "sqlite3": "^5.0.8",
     "web-vitals": "^1.0.1",
-    "xlsx": "^0.16.0"
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -43,11 +43,17 @@
     "extends": null,
     "appId": "com.xxx.app",
     "mac": {
-      "target": ["dmg","zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
-      "target": ["nsis","zip"]
-      }
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    }
   },
   "eslintConfig": {
     "extends": [

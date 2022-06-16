@@ -182,7 +182,7 @@ const Viewer = props => {
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, sheet, fileName)
       const workbookBlob = workbook2blob(wb)
-      openDownload(workbookBlob, `${fileName}.xls`)
+      openDownload(workbookBlob, `${fileName}.csv`)
     })
   }
 
@@ -206,7 +206,7 @@ const Viewer = props => {
   // 将 workbook 转化为 blob 对象
   const workbook2blob = workbook => {
     const wopts = {
-      bookType: 'xlsx',
+      bookType: 'csv',
       bookSST: false,
       type: 'binary',
     }
@@ -689,6 +689,7 @@ const Viewer = props => {
         handleExportExcel={handleExportExcel}
         handleToolbarClick={handleToolbarClick}
         setShowViewer={props.setShowViewer}
+        globalData={props.data}
       />
       <div className="viewer-center-box">
         <LeftSidePanel patientInfo={props.data} getSelectedSeries={getSelectedSeries} />
@@ -701,6 +702,7 @@ const Viewer = props => {
         />
         <div className="middle-box-wrap">
           <MiddleSidePanel
+            data={props.data}
             handleCheckedListClick={handleCheckedListClick}
             onCheckChange={onCheckChange}
             noduleList={noduleList}

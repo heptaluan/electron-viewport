@@ -17,12 +17,12 @@ const MiddleSidePanel = props => {
       <div className="middle-side-panel-box">
         <div className="basic-info-box">
           <div className="title">基本信息</div>
-          <Descriptions size={size}>
-            <Descriptions.Item label="姓名">LIU HUA</Descriptions.Item>
-            <Descriptions.Item label="性别">男</Descriptions.Item>
-            <Descriptions.Item label="年龄">40</Descriptions.Item>
-            <Descriptions.Item label="病人ID">123123</Descriptions.Item>
-            <Descriptions.Item label="检查时间">2021年12月30日</Descriptions.Item>
+          <Descriptions column={1} size={size}>
+            <Descriptions.Item label="姓名">{props.data.patientName}</Descriptions.Item>
+            <Descriptions.Item label="性别">{props.data.patientGender}</Descriptions.Item>
+            {/* <Descriptions.Item label="年龄">{props.data.patientName}</Descriptions.Item> */}
+            <Descriptions.Item label="病人ID">{props.data.patientID}</Descriptions.Item>
+            <Descriptions.Item label="检查时间">{props.data.acquisitionDate}</Descriptions.Item>
           </Descriptions>
         </div>
         <div className="nodule-list-box">

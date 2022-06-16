@@ -110,8 +110,8 @@ const listColumns = [
   {
     title: '添加时间',
     dataIndex: 'acquisitionDate',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => new Date(a.acquisitionDate) - new Date(b.acquisitionDate),
+    // defaultSortOrder: 'descend',
+    // sorter: (a, b) => new Date(a.acquisitionDate) - new Date(b.acquisitionDate),
   },
 ]
 
@@ -264,7 +264,7 @@ const StudyList = props => {
                     <Button onClick={e => props.setShowViewer(true)} type="primary">
                       重置
                     </Button>
-                    <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
+                    {/* <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
                       删除 patient
                     </Button>
                     <Button onClick={e => deleteTableSql('dicom_study')} type="primary">
@@ -284,7 +284,7 @@ const StudyList = props => {
                     </Button>
                     <Button onClick={e => removeDuplicates } type="primary">
                       去重 Patient
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </div>
