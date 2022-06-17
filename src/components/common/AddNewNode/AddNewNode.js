@@ -38,7 +38,7 @@ const AddNewNode = props => {
             <div className="list-title">肺叶：</div>
             <Radio.Group value={item.lobe} onChange={e => onLobeChange(e, item.uuid)}>
               <Radio value={'上叶'}>上叶</Radio>
-              <Radio value={'中叶'}>中叶</Radio>
+              {item.lung === '左肺' ? null : <Radio value={'中叶'}>中叶</Radio>}
               <Radio value={'下叶'}>下叶</Radio>
             </Radio.Group>
           </div>
@@ -62,7 +62,7 @@ const AddNewNode = props => {
           <div className="list">
             <span className="list-title">建议：</span>
             <Input
-              placeholder="这里输入结节备注信息"
+              placeholder="请输入当前结节建议信息"
               size="small"
               style={{ width: 200, height: 30, marginTop: 2, fontSize: 13 }}
               value={item.suggest}

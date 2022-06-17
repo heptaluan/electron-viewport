@@ -1,14 +1,39 @@
-.ant-descriptions {
-  margin-bottom: 18px;
-  .ant-descriptions-header {
-    margin-bottom: 10px;
+.ant-modal-body {
+  padding-top: 0;
+}
+.modal-content-wrap {
+  .ant-tabs {
+    .ant-tabs-nav {
+      margin-bottom: 6px;
+      &::before {
+        border-bottom: none;
+      }
+    }
   }
-  .ant-descriptions-row {
-    th {
-      padding-bottom: 10px;
+
+  .ant-input-search {
+    margin-bottom: 12px;
+    .ant-btn-primary {
+      color: #555;
+      border-color: #ccc;
+      background: initial;
     }
-    td {
-      padding-bottom: 6px;
+  }
+  mark {
+    background-color: yellow;
+  }
+  .descriptionBox {
+    .item {
+      margin-bottom: 14px;
+      .itemHeader {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .itemTxt {
+        margin-bottom: 4px;
+      }
     }
+
   }
 }

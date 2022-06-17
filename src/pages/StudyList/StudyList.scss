@@ -39,4 +39,10 @@
       align-self: center;
     }
   }
+
+  .export-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }

@@ -57,10 +57,15 @@
           border: 1px solid transparent;
           padding: 0 10px 0 5px;
 
+          .lung,
+          .lobe {
+            flex: 2;
+          }
+
           .num,
           .type,
           .suggest {
-            flex: 2;
+            flex: 3;
           }
 
           .suggest {
@@ -70,7 +75,6 @@
           .size {
             flex: 3;
           }
-
         }
 
         .table-content {
@@ -101,13 +105,14 @@
             }
           }
 
-          .num,
-          .type,
-          .suggest {
+          .lung,
+          .lobe {
             flex: 2;
           }
 
-          .size {
+          .num,
+          .type,
+          .suggest {
             flex: 3;
           }
 
@@ -246,7 +251,7 @@
 
 .ant-checkbox-wrapper {
   justify-content: space-between;
-  flex: 2 !important;
+  flex: 3 !important;
 }
 
 .ant-popover-inner-content {

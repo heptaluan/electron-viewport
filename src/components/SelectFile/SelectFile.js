@@ -7,12 +7,6 @@ import {readFileInfo, addDicomFile, dicomDateTimeToLocale, keyFormat} from "../.
 import {insertData, SQLContainer} from "../../util/sqlite";
 
 const SelectFile = (props) => {
-    const output = (sth) => {
-        console.log('output: ', props.data.output)
-    }
-    const cdHandler = (sth) => {
-        console.log('cd: ', sth)
-    }
     let patientList = []
     let studyList = []
     let seriesList = []
@@ -228,7 +222,6 @@ const SelectFile = (props) => {
           importHandler()
       }}>导入</Button>
       <Button>光盘导入</Button>
-      <Button onClick={() => output()}>导出</Button>
     </div>
   )
 }

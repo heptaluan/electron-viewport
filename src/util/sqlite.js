@@ -103,7 +103,7 @@ export const SQLContainer = {
   dicomStudySql:
     'create table if not exists dicom_study(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, key varchar(64),patientID varchar(32),acquisitionDate varchar(255), studyID varchar(32), studyDescription varchar(32),addTime varchar(255),sequenceNum varchar(32))',
   dicomSeriesSql:
-    'create table if not exists dicom_series(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, key varchar(64),studyID varchar(32),seriesNo varchar(32),seriesDescription varchar(255), modality varchar(32),acquisitionDate varchar(255),size varchar(32),addTime varchar(32),framePath varchar(255),frameNum varchar(32))',
+    'create table if not exists dicom_series(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, key varchar(64),studyID varchar(32),seriesNo varchar(32),seriesDescription varchar(255), modality varchar(32),acquisitionDate varchar(255),size varchar(32),addTime varchar(32),framePath varchar(255),frameNum varchar(32),suggest varchar(255))',
   insertPatientSql:
     'insert into dicom_patient(key, patientName,patientID,patientGender,patientBirthday,acquisitionDate,institution, deviceManufacturer,deviceModelName,addTime,studyNum) values(?,?, ?, ?,?, ?, ?,?, ?, ?,?)',
   insertStudySql:
@@ -161,6 +161,22 @@ export const queryNodeList = (patientID, seriesNo, callback) => {
 export const queryAllNodeList = (patientID, callback) => {
   const sql = ` where patientID = '${patientID}'`
   queryData(SQLContainer.queryNodeListSql + sql, callback)
+}
+
+export const updateSeriesSuggest = (suggest, studyId, seriesNo, callback) => {
+  const sql = `update dicom_series set suggest = ${suggest} where studyId = ${studyId} and seriesNo = ${seriesNo}`
+  queryData(sql, callback)
+}
+
+export const querySeriesSuggest = (studyId, seriesNo, callback) => {
+  const sql = ` where studyID = '${studyId}' and seriesNo = '${seriesNo}'`
+  queryData(SQLContainer.querySeriesSql + sql, callback)
+}
+
+export const queryPatientList = (value, callback) => {
+  const sql = ` select * from dicom_patient where patientName like '%${value}%' or patientGender like '%${value}%' or patientID like '%${value}%' or patientBirthday like '%${value}%' or acquisitionDate like '%${value}%' or institution like '%${value}%' or deviceManufacturer like '%${value}%' or deviceModelName like '%${value}%' or addTime like '%${value}%' or studyNum like '%${value}%'
+  `
+  queryData(sql, callback)
 }
 
 createTable(SQLContainer.dicomPatientSql)

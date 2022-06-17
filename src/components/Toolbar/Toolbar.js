@@ -153,6 +153,7 @@ const Toolbar = props => {
 
     // 父组件传值
     props.handleToolbarClick(type, state[index].checked)
+
   }
 
   return (
@@ -194,6 +195,7 @@ const Toolbar = props => {
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
+        destroyOnClose={true}
         width={600}
         footer={null}
       >

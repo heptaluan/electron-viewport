@@ -11,8 +11,15 @@ import AddNoduleTool from '../../components/common/AddNoduleTool/AddNoduleTool'
 import { Modal, message } from 'antd'
 import Draggable from 'react-draggable'
 import AddNewNode from '../../components/common/AddNewNode/AddNewNode'
-import { insertData, queryNodeList, SQLContainer, queryAllNodeList } from '../../util/sqlite'
-import * as XLSX from 'xlsx'
+import {
+  insertData,
+  queryNodeList,
+  SQLContainer,
+  queryAllNodeList,
+  updateSeriesSuggest,
+  querySeriesSuggest,
+} from '../../util/sqlite'
+import { downloadFile } from '../../util/index'
 
 const Viewer = props => {
   // 初始化
@@ -23,6 +30,7 @@ const Viewer = props => {
   // const [sequenceListData, setLeftSidePanelData] = useState([])
   const [noduleList, setNoduleList] = useState([])
   const [noduleMapList, setNoduleMapList] = useState([])
+  const [noduleSuggest, setNoduleSuggest] = useState('')
 
   // 当前帧数
   const [currentImageIdIndex, setCurrentImageIdIndex] = useState(0)
@@ -70,15 +78,38 @@ const Viewer = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 结节总结信息初始化
+  useEffect(() => {
+    const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
+    const studyId = seriesInfo.studyID
+    const seriesNo = seriesInfo.seriesNo
+    querySeriesSuggest(studyId, seriesNo, res => {
+      setNoduleSuggest(res[0].suggest)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // 点击序列切换
   const getSelectedSeries = selectedSeries => {
     setCurrentImageIdIndex(0)
+    cornerstoneTools.clearToolState(cornerstoneElement, 'MarkNodule')
+    cornerstone.updateImage(cornerstoneElement)
+    setNoduleList([])
+    setNoduleMapList([])
+
     selectedSeries.imageIDList.then(res => {
       setImagesConfig([...res])
       const seriesNo = selectedSeries.seriesNo
-      queryNodeList(patientID, seriesNo, res => {
-        formatNodeData(res)
+      const studyId = selectedSeries.studyID
+      queryNodeList(patientID, seriesNo, data => {
+        formatNodeData(data)
       })
+      querySeriesSuggest(studyId, seriesNo, data => {
+        setNoduleSuggest(data[0].suggest)
+      })
+      setTimeout(() => {
+        addNodeTool(cornerstoneElement, 0)
+      }, 200)
     })
   }
 
@@ -117,15 +148,6 @@ const Viewer = props => {
 
   // 格式化结节数据
   const formatNodeData = resultInfo => {
-    if (resultInfo.length === 0) {
-      if (cornerstoneElement) {
-        cornerstoneTools.clearToolState(cornerstoneElement, 'MarkNodule')
-        cornerstone.updateImage(cornerstoneElement)
-      }
-      setNoduleList([])
-      setNoduleMapList([])
-      return false
-    }
     const nodulesList = []
     const nodulesMapList = []
     let index = 0
@@ -171,10 +193,10 @@ const Viewer = props => {
   // 导出结节信息
   const handleExportExcel = () => {
     queryAllNodeList(patientID, res => {
-      if (res.length === 0) {
-        message.warn(`当前病人暂无结节信息`)
-        return false
-      }
+      // if (res.length === 0) {
+      //   message.warn(`当前病人暂无结节信息`)
+      //   return false
+      // }
 
       const exportData = []
 
@@ -183,57 +205,13 @@ const Viewer = props => {
           patientID: res[i].patientID,
           seriesNo: res[i].seriesNo,
           imageIndex: res[i].imageIndex,
-          nodeBox: res[i].nodeBox
+          nodeBox: res[i].nodeBox,
         })
       }
 
-      const fileName = 'test'
-      const sheet = XLSX.utils.json_to_sheet(exportData)
-
-      const wb = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(wb, sheet, fileName)
-      const workbookBlob = workbook2blob(wb)
-      openDownload(workbookBlob, `${fileName}.csv`)
+      const fileName = `病人ID-${patientID}`
+      downloadFile(exportData, fileName)
     })
-  }
-
-  // 创建 blobUrl，通过 createObjectURL 实现下载
-  const openDownload = (blob, fileName) => {
-    if (typeof blob === 'object' && blob instanceof Blob) {
-      blob = URL.createObjectURL(blob)
-    }
-    const aLink = document.createElement('a')
-    aLink.href = blob
-    aLink.download = fileName || ''
-    let event
-    if (window.MouseEvent) event = new MouseEvent('click')
-    else {
-      event = document.createEvent('MouseEvents')
-      event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-    }
-    aLink.dispatchEvent(event)
-  }
-
-  // 将 workbook 转化为 blob 对象
-  const workbook2blob = workbook => {
-    const wopts = {
-      bookType: 'csv',
-      bookSST: false,
-      type: 'binary',
-    }
-    const wbout = XLSX.write(workbook, wopts)
-    const blob = new Blob([s2ab(wbout)], {
-      type: 'application/octet-stream',
-    })
-    return blob
-  }
-
-  // 将字符串转ArrayBuffer
-  const s2ab = s => {
-    const buf = new ArrayBuffer(s.length)
-    const view = new Uint8Array(buf)
-    for (let i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xff
-    return buf
   }
 
   // ===========================================================
@@ -376,7 +354,7 @@ const Viewer = props => {
         break
       case 'Reset':
         cornerstone.reset(cornerstoneElement)
-        windowChange(cornerstoneElement, cornerstone.getImage(cornerstoneElement), 2)
+        // windowChange(cornerstoneElement, cornerstone.getImage(cornerstoneElement), 2)
         break
       default:
         break
@@ -429,7 +407,7 @@ const Viewer = props => {
   const saveResults = () => {
     const postData = formatPostData()
     insertData(SQLContainer.insertNodeListSql, postData)
-    message.success(`结节结果保存成功`)
+    message.success(`新增结节成功`)
   }
 
   // ===========================================================
@@ -596,6 +574,16 @@ const Viewer = props => {
     })
   }
 
+  // 结节总结信息保存
+  const handleTextareaOnChange = suggest => {
+    const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
+    const seriesNo = seriesInfo.seriesNo
+    const studyId = seriesInfo.studyID
+    updateSeriesSuggest(suggest, studyId, seriesNo, res => {
+      message.success(`结节总结信息添加成功 `)
+    })
+  }
+
   // =======================================================
 
   const showMarkDialog = (e, cornerstoneElement) => {
@@ -714,8 +702,10 @@ const Viewer = props => {
         <div className="middle-box-wrap">
           <MiddleSidePanel
             data={props.data}
+            noduleSuggest={noduleSuggest}
             handleCheckedListClick={handleCheckedListClick}
             onCheckChange={onCheckChange}
+            handleTextareaOnChange={handleTextareaOnChange}
             noduleList={noduleList}
           />
         </div>
@@ -743,6 +733,7 @@ const Viewer = props => {
             新增结节
           </div>
         }
+        // maskStyle={{background: 'transparent'}}
         okText={'确定'}
         cancelText={'取消'}
         visible={modalVisible}
