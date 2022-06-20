@@ -195,6 +195,9 @@ const Toolbar = props => {
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
+        bodyStyle={{
+          height: 800,
+        }}
         destroyOnClose={true}
         width={600}
         footer={null}

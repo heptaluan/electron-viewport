@@ -55,28 +55,23 @@ const Viewer = props => {
   // 影像信息初始化
   useEffect(() => {
     const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
+    const seriesNo = seriesInfo.seriesNo
+    const patientID = props.data.patientID
+    setPatientID(patientID)
+
     seriesInfo.imageIDList.then(res => {
       if (res.length > 0) {
         const imagesConfig = []
         for (let i = 0; i < res.length; i++) {
           imagesConfig.push(res[i])
         }
-        setImagesConfig([...imagesConfig])
+        queryNodeList(patientID, seriesNo, res => {
+          formatNodeData(res)
+          setImagesConfig([...imagesConfig])
+        })
       }
     })
   }, [props.data])
-
-  // 结节信息初始化
-  useEffect(() => {
-    const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
-    const seriesNo = seriesInfo.seriesNo
-    const patientID = props.data.patientID
-    setPatientID(patientID)
-    queryNodeList(patientID, seriesNo, res => {
-      formatNodeData(res)
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // 结节总结信息初始化
   useEffect(() => {

@@ -47,7 +47,7 @@ const SelectFile = (props) => {
             studyID: dict['00200010'].Value[0],
             seriesNo: dict['00200011'].Value[0],
             seriesDescription: dict['0008103E'].Value[0],
-            // layer
+            layer: dict['00180050'].Value[0] + 'mm',
             modality: dict['00080060'].Value[0],
             acquisitionDate:  dicomDateTimeToLocale(dict['00080022'].Value[0] + '.' + dict['00080032'].Value[0]),
             size: dict['00280010'].Value[0] + ' x ' + dict['00280011'].Value[0],

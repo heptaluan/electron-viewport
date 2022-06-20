@@ -103,13 +103,13 @@ export const SQLContainer = {
   dicomStudySql:
     'create table if not exists dicom_study(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, key varchar(64),patientID varchar(32),acquisitionDate varchar(255), studyID varchar(32), studyDescription varchar(32),addTime varchar(255),sequenceNum varchar(32))',
   dicomSeriesSql:
-    'create table if not exists dicom_series(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, key varchar(64),studyID varchar(32),seriesNo varchar(32),seriesDescription varchar(255), modality varchar(32),acquisitionDate varchar(255),size varchar(32),addTime varchar(32),framePath varchar(255),frameNum varchar(32),suggest varchar(255))',
+    'create table if not exists dicom_series(id integer NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, key varchar(64),studyID varchar(32),seriesNo varchar(32),seriesDescription varchar(255), layer varchar(32), modality varchar(32),acquisitionDate varchar(255),size varchar(32),addTime varchar(32),framePath varchar(255),frameNum varchar(32),suggest varchar(255))',
   insertPatientSql:
     'insert into dicom_patient(key, patientName,patientID,patientGender,patientBirthday,acquisitionDate,institution, deviceManufacturer,deviceModelName,addTime,studyNum) values(?,?, ?, ?,?, ?, ?,?, ?, ?,?)',
   insertStudySql:
     'insert into dicom_study(key, patientID,acquisitionDate, studyID, studyDescription,addTime,sequenceNum ) values(?,?,?,?,?,?,?)',
   insertSeriesSql:
-    'insert into dicom_series(key, studyID,seriesNo,seriesDescription, modality,acquisitionDate,size,addTime,framePath,frameNum) values(?,?,?,?,?,?,?,?,?,?)',
+    'insert into dicom_series(key, studyID,seriesNo,seriesDescription, layer, modality,acquisitionDate,size,addTime,framePath,frameNum) values(?,?,?,?,?,?,?,?,?,?,?)',
   queryPatientSql: 'select * from dicom_patient',
   queryStudySql: 'select * from dicom_study',
   querySeriesSql: 'select * from dicom_series',

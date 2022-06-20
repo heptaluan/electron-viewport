@@ -34,6 +34,21 @@
         margin-bottom: 4px;
       }
     }
-
+  }
+  .descriptionBox, .rawInfoBox {
+    overflow-y: scroll;
+    max-height: 680px;
+  }
+  .searchBox  {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    //position: fixed;
+    .ant-input-affix-wrapper {
+      width: 80%;
+    }
+    .btn {
+      width: 8%;
+    }
   }
 }

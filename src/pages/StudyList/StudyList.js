@@ -92,6 +92,10 @@ const listColumns = [
     dataIndex: 'seriesDescription',
   },
   {
+    title: '层厚',
+    dataIndex: 'layer',
+  },
+  {
     title: '形式',
     dataIndex: 'modality',
   },
@@ -243,6 +247,9 @@ const StudyList = props => {
   const handleSearch = () => {
     queryPatientList(searchData, res => {
       console.log(res)
+      getDicomFromDB(res)
+      getStudyFromDB([])
+      getSeriesFromDB([])
     })
   }
 
@@ -298,7 +305,7 @@ const StudyList = props => {
         </div>
         <div className="table-box">
           <header className="export-box">
-            <span>病人列表</span>
+            <span>DICOM记录</span>
             <Button onClick={handleExport}>导出结节信息</Button>
           </header>
           <Table

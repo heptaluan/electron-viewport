@@ -1,21 +1,20 @@
 import React, { useState, useEffect} from 'react'
 import './ModalContent.scss'
 import {readFileInfo, dicomDateTimeToLocale, dicomTimeToLocale, readFileRaw} from "../../util";
-import { Descriptions, Input, Tabs } from 'antd'
-// import ECHighlighter from "react-ec-highlighter";
+import {Button, Input, Tabs} from 'antd'
 import daikon from "daikon"
+import * as Mark from 'mark.js'
+import {ArrowDownOutlined, ArrowUpOutlined} from "@ant-design/icons";
 
 const ModalContent = (props) => {
-    const { Search } = Input
     const { TabPane } = Tabs;
     const [input1, setInput1] = useState('')
     const [input2, setInput2] = useState('')
+    const [searchCurrent, setSearchCurrent] = useState(0)
     const [thisData, setThisData] = useState({
         dict : null,
         meta : null,
-        dcmHTML : null,
-        importantInnerTxt: null,
-        allInnerTxt: null,
+        dcmHTML : null
     })
     // console.log('props: ', props.globalData)
 
@@ -32,52 +31,77 @@ const ModalContent = (props) => {
         rawInfo = readFileRaw(selectedPath)
         const data = new DataView(rawInfo)
         // daikon.Parser.verbose = true;
-        console.log('info: ', info)
-        console.log('daikon: ', daikon.Series.parseImage(data))
-        // const a = daikon.Series.parseImage(data)
-        // console.log('daikon: ', a.toHTMLString(1))
+        // console.log('info: ', info)
+        // console.log('daikon: ', daikon.Series.parseImage(data).toString())
+        const formatRawData = rawInfoBoxFormat(daikon.Series.parseImage(data).toString())
         setThisData(pr => ({
             ...pr,
             dict: info['dict'],
             meta: info['meta'],
-            dcmHTML: daikon.Series.parseImage(data).toString(),
-            importantInnerTxt: document.querySelectorAll('.descriptionBox').textContent,
-            allInnerTxt: document.querySelectorAll('.rawInfoBox').textContent
+            dcmHTML: formatRawData,
         }))
     }, [])
 
-    // console.log(a)
 
     const textFormat = (txt) => {
         if (txt) {
             return txt['Value'].toString()
         }
     }
-    const onSearch = (txt, pageIndex) => {
-        console.log(txt)
+    const onSearch = (txt, pageIndex, next) => {
+        // console.log(txt)
         const lowerTxt = txt.toLowerCase()
         const markArr = []
-        const className = pageIndex === 0 ? '.descriptionBox .itemTxt' : '.rawInfoBox'
-        for (const element of document.querySelectorAll(className)) {
+        const className = pageIndex === 0 ? '.descriptionBox' : '.rawInfoBox'
+        const innerClassName = pageIndex === 0 ? '.descriptionBox .item' : '.rawItem'
+        const instance = new Mark(document.querySelectorAll(className)[0])
+        instance.unmark()
+        instance.mark(lowerTxt, {"separateWordSearch": false})
+
+        for (const element of document.querySelectorAll(innerClassName)) {
             // console.log(element.textContent)
             const innerTxt = element.textContent
-            // element.textContent = innerTxt.replace(/<(\/*)mark*>/g, '');
             if (txt.length > 0 && innerTxt.toLowerCase().includes(lowerTxt)) {
-                // element.textContent = innerTxt.replace(new RegExp(lowerTxt, "gi"), (match) => `<mark>${match}</mark>`);
                 markArr.push(element)
             }
         }
-        if (markArr.length > 0) {
-            markArr[0].scrollIntoView()
+
+        if (next === 'top') {
+            // document.querySelectorAll(className)[0].scrollIntoView(true)
         }
+
+        if (markArr.length > 0) {
+            if (next === 'up') {
+                if (searchCurrent >= 1) {
+                    markArr[searchCurrent-1].scrollIntoView()
+                    setSearchCurrent(searchCurrent - 1)
+                }
+            } else if (next === 'down') {
+                if (searchCurrent < markArr.length) {
+                    markArr[searchCurrent].scrollIntoView()
+                    setSearchCurrent(searchCurrent + 1)
+                }
+            }
+        }
+
+    }
+
+    const rawInfoBoxFormat = (content) => {
+        let temp =  content.replaceAll('<span', '<div class="rawItem"><span')
+        temp = temp.replaceAll('<br />','</div>')
+        temp = temp.replaceAll('&nbsp;',' ')
+        //
+        return temp
+        // return content
     }
 
     const onChange = (key) => {
         // console.log(key);
         setInput1('')
         setInput2('')
-        onSearch('', 0)
-        onSearch('', 1)
+        // onSearch('', key === 0 ? 1: 0, 'top')
+        onSearch('', 0, 'top')
+        onSearch('', 1, 'top')
     }
     const inputChange = (e, index) => {
         if (index === 0) {
@@ -85,6 +109,7 @@ const ModalContent = (props) => {
         } else if (index === 1) {
             setInput2(e.target.value)
         }
+        setSearchCurrent(0)
     }
 
 
@@ -93,86 +118,86 @@ const ModalContent = (props) => {
     <div className="modal-content-wrap" >
         {
             thisData.dict ?
-                <Tabs defaultActiveKey="1" centered onChange={onChange}>
-                    <TabPane tab="关键DICOM属性" key="1">
-                        <Search
-                            value={input1}
-                            placeholder="输入查询字段"
-                            allowClear
-                            enterButton="搜索"
-                            onChange={e => inputChange(e, 0)}
-                            onSearch={e => onSearch(e, 0)}
-                        />
-                        {/* {thisData.importantInnerTxt ?
-                            <div>
-                                111<ECHighlighter
-                                searchPhrase={input1}
-                                text={thisData?.importantInnerTxt}
-                            /> 222
-                            </div>
-                            : null
-                        } */}
+                <Tabs defaultActiveKey="0" centered onChange={onChange}>
+                    <TabPane tab="关键DICOM属性" key="0">
+                        <div className="searchBox">
+                            <Input
+                                value={input1}
+                                placeholder="输入查询字段"
+                                allowClear
+                                onChange={e => inputChange(e, 0)}
+                            />
+                            <Button type="primary" className="btn" icon={<ArrowUpOutlined />}
+                                    onClick={e => onSearch(input1, 0, 'up')}
+                            ></Button>
+                            <Button type="primary" className="btn" icon={<ArrowDownOutlined />}
+                                    onClick={e => onSearch(input1, 0, 'down')}
+                            ></Button>
+                        </div>
 
                         <div className="descriptionBox">
-
-
-
                             <div className="item">
                                 <div className="itemHeader">病人信息</div>
-                                <div className="itemTxt"><span>Patient's Name：</span>{textFormat(thisData.dict['00100010'])}</div>
-                                <div className="itemTxt"><span>Patient's ID：</span>{textFormat(thisData?.dict['00100020'])}</div>
-                                <div className="itemTxt"><span>Patient's Gender：</span>{textFormat(thisData?.dict['00100040'])}</div>
-                                <div className="itemTxt"><span>Patient's Name：</span>{textFormat(thisData?.dict['00100030'])}</div>
+                                <div className="itemTxt">{"Patient's Name：" +textFormat(thisData.dict['00100010'])}</div>
+                                <div className="itemTxt">{"Patient's ID：" +textFormat(thisData?.dict['00100020'])}</div>
+                                <div className="itemTxt">{"Patient's Gender：" +textFormat(thisData?.dict['00100040'])}</div>
+                                <div className="itemTxt">{"Patient's Name：" +textFormat(thisData?.dict['00100030'])}</div>
                             </div>
                             <div className="item">
                                 <div className="itemHeader">CT机生产商信息</div>
-                                <div className="itemTxt"><span>Manufacturer：</span>{textFormat(thisData?.dict['00080070'])}</div>
-                                <div className="itemTxt"><span>Manufacturer's Model Name：</span>{textFormat(thisData?.dict['00081090'])}</div>
-                                <div className="itemTxt"><span>Station Name：</span>{textFormat(thisData?.dict['00081010'])}</div>
+                                <div className="itemTxt">{"Manufacturer：" +textFormat(thisData?.dict['00080070'])}</div>
+                                <div className="itemTxt">{"Manufacturer's Model Name：" +textFormat(thisData?.dict['00081090'])}</div>
+                                <div className="itemTxt">{"Station Name：" +textFormat(thisData?.dict['00081010'])}</div>
                             </div>
                             <div className="item">
                                 <div className="itemHeader">CT检测信息</div>
-                                <div className="itemTxt"><span>Study Instance UID：</span>{textFormat(thisData?.dict['0020000D'])}</div>
-                                <div className="itemTxt"><span>Study Date：</span>{dicomDateTimeToLocale(textFormat(thisData?.dict['00080020']),'date')}</div>
-                                <div className="itemTxt"><span>Study Time：</span>{dicomTimeToLocale(textFormat(thisData?.dict['00080030']))}</div>
-                                <div className="itemTxt"><span>Study ID：</span>{textFormat(thisData?.dict['00200010'])}</div>
-                                <div className="itemTxt"><span>Study Description：</span>{textFormat(thisData?.dict['00081030'])}</div>
+                                <div className="itemTxt">{"Study Instance UID：" +textFormat(thisData?.dict['0020000D'])}</div>
+                                <div className="itemTxt">{"Study Date：" +dicomDateTimeToLocale(textFormat(thisData?.dict['00080020']),'date')}</div>
+                                <div className="itemTxt">{"Study Time：" +dicomTimeToLocale(textFormat(thisData?.dict['00080030']))}</div>
+                                <div className="itemTxt">{"Study ID：" +textFormat(thisData?.dict['00200010'])}</div>
+                                <div className="itemTxt">{"Study Description：" +textFormat(thisData?.dict['00081030'])}</div>
                             </div>
                             <div className="item">
                                 <div className="itemHeader">序列</div>
-                                <div className="itemTxt"><span>Series Instance UlD：</span>{textFormat(thisData?.dict['0020000E'])}</div>
-                                <div className="itemTxt"><span>Series Date：</span>{dicomDateTimeToLocale(textFormat(thisData?.dict['00080021']),'date')}</div>
-                                <div className="itemTxt"><span>Series Time：</span>{dicomTimeToLocale(textFormat(thisData?.dict['00080031']))}</div>
-                                <div className="itemTxt"><span>Series Number：</span>{textFormat(thisData?.dict['00200011'])}</div>
-                                <div className="itemTxt"><span>Modality：</span>{textFormat(thisData?.dict['00080060'])}</div>
-                                <div className="itemTxt"><span>Institution Name：</span>{textFormat(thisData?.dict['00080080'])}</div>
-                                <div className="itemTxt"><span>Series Description：</span>{textFormat(thisData?.dict['0008103E'])}</div>
+                                <div className="itemTxt">{"Series Instance UlD：" + textFormat(thisData?.dict['0020000E'])}</div>
+                                <div className="itemTxt">{"Series Date：" + dicomDateTimeToLocale(textFormat(thisData?.dict['00080021']),'date')}</div>
+                                <div className="itemTxt">{"Series Time：" +dicomTimeToLocale(textFormat(thisData?.dict['00080031']))}</div>
+                                <div className="itemTxt">{"Series Number：" +textFormat(thisData?.dict['00200011'])}</div>
+                                <div className="itemTxt">{"Modality：" +textFormat(thisData?.dict['00080060'])}</div>
+                                <div className="itemTxt">{"Institution Name：" +textFormat(thisData?.dict['00080080'])}</div>
+                                <div className="itemTxt">{"Series Description：" +textFormat(thisData?.dict['0008103E'])}</div>
                             </div>
                             <div className="item">
                                 <div className="itemHeader">DICOM对象</div>
-                                <div className="itemTxt"><span>SOP Instance UID：</span>{textFormat(thisData?.dict['00080018'])}</div>
-                                <div className="itemTxt"><span>Image Type：</span>{textFormat(thisData?.dict['00080008'])}</div>
-                                <div className="itemTxt"><span>Transfer Syntax UID：</span>{textFormat(thisData.meta['00020010'])}</div>
-                                <div className="itemTxt"><span>Instance Number：</span>{textFormat(thisData?.dict['00200013'])}</div>
-                                <div className="itemTxt"><span>Photometric Interpretation：</span>{textFormat(thisData?.dict['00280004'])}</div>
-                                <div className="itemTxt"><span>Samples per Pixel：</span>{textFormat(thisData?.dict['00280002'])}</div>
-                                <div className="itemTxt"><span>Pixel Representation：</span>{textFormat(thisData?.dict['00280103'])}</div>
-                                <div className="itemTxt"><span>Rows：</span>{textFormat(thisData?.dict['00280010'])}</div>
-                                <div className="itemTxt"><span>Columns：</span>{textFormat(thisData?.dict['00280011'])}</div>
-                                <div className="itemTxt"><span>Bits Allocated：</span>{textFormat(thisData?.dict['00280100'])}</div>
-                                <div className="itemTxt"><span>Bits Stored：</span>{textFormat(thisData?.dict['00280101'])}</div>
+                                <div className="itemTxt">{"SOP Instance UID：" +textFormat(thisData?.dict['00080018'])}</div>
+                                <div className="itemTxt">{"Image Type：" +textFormat(thisData?.dict['00080008'])}</div>
+                                <div className="itemTxt">{"Transfer Syntax UID：" +textFormat(thisData.meta['00020010'])}</div>
+                                <div className="itemTxt">{"Instance Number：" +textFormat(thisData?.dict['00200013'])}</div>
+                                <div className="itemTxt">{"Photometric Interpretation：" +textFormat(thisData?.dict['00280004'])}</div>
+                                <div className="itemTxt">{"Samples per Pixel：" +textFormat(thisData?.dict['00280002'])}</div>
+                                <div className="itemTxt">{"Pixel Representation：" +textFormat(thisData?.dict['00280103'])}</div>
+                                <div className="itemTxt">{"Rows：" +textFormat(thisData?.dict['00280010'])}</div>
+                                <div className="itemTxt">{"Columns：" +textFormat(thisData?.dict['00280011'])}</div>
+                                <div className="itemTxt">{"Bits Allocated：" +textFormat(thisData?.dict['00280100'])}</div>
+                                <div className="itemTxt">{"Bits Stored：" +textFormat(thisData?.dict['00280101'])}</div>
                             </div>
                         </div>
                     </TabPane>
-                    <TabPane tab="全部DICOM属性" key="2">
-                        <Search
-                            placeholder="输入查询字段"
-                            allowClear
-                            value={input2}
-                            enterButton="搜索"
-                            onChange={e => inputChange(e, 1)}
-                            onSearch={e => onSearch(e, 1)}
-                        />
+                    <TabPane tab="全部DICOM属性" key="1">
+                        <div className="searchBox">
+                            <Input
+                                value={input2}
+                                placeholder="输入查询字段"
+                                allowClear
+                               onChange={e => inputChange(e, 1)}
+                            />
+                            <Button type="primary" className="btn" icon={<ArrowUpOutlined />}
+                                    onClick={e => onSearch(input2, 1, 'up')}
+                            ></Button>
+                            <Button type="primary" className="btn" icon={<ArrowDownOutlined />}
+                                    onClick={e => onSearch(input2, 1, 'down')}
+                            ></Button>
+                        </div>
                         <div className="rawInfoBox" dangerouslySetInnerHTML={{__html: thisData?.dcmHTML}}></div>
                     </TabPane>
                 </Tabs>
