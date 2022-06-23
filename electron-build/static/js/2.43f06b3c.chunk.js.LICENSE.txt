@@ -1,0 +1,1457 @@
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+/*!
+       * The buffer module from node.js, for the browser.
+       *
+       * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+       * @license  MIT
+       */
+
+/*!
+      Copyright (c) 2017 Jed Watson.
+      Licensed under the MIT License (MIT), see
+      http://jedwatson.github.io/classnames
+    */
+
+/*!
+  Copyright (c) 2018 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+/*!
+ Copyright (c) 2007-2010, Jan de Vaan
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution.
+
+ * Neither the name of my employer, nor the names of its contributors may be
+ used to endorse or promote products derived from this software without
+ specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*!
+ The MIT License (MIT)
+
+ Copyright (c) 2014 Chris Hafey (chafey@gmail.com)
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+
+/*! ../../../../externalModules.js */
+
+/*! ../../../../store/index.js */
+
+/*! ../../../../util/getActiveTool */
+
+/*! ../../../base/BaseAnnotationTool */
+
+/*! ../../../externalModules */
+
+/*! ../../../stateManagement/toolState.js */
+
+/*! ../../../store/index */
+
+/*! ../../../store/index.js */
+
+/*! ../../../store/setToolCursor.js */
+
+/*! ../../../util/clip */
+
+/*! ../../../util/ellipse */
+
+/*! ../../../util/getActiveTool */
+
+/*! ../../../util/getCircleCoords */
+
+/*! ../../../util/getCircleCoords.js */
+
+/*! ../../../util/getPixelSpacing */
+
+/*! ../../../util/isPointInImage */
+
+/*! ../../../util/isPointInPolygon */
+
+/*! ../../../util/logger */
+
+/*! ../../../util/segmentation */
+
+/*! ../../../util/triggerEvent.js */
+
+/*! ../../drawing */
+
+/*! ../../drawing/drawHandles.js */
+
+/*! ../../drawing/drawLinkedTextBox.js */
+
+/*! ../../drawing/drawTextBox.js */
+
+/*! ../../drawing/index.js */
+
+/*! ../../eventDispatchers/index.js */
+
+/*! ../../eventListeners/index.js */
+
+/*! ../../events.js */
+
+/*! ../../externalModules */
+
+/*! ../../externalModules.js */
+
+/*! ../../index */
+
+/*! ../../index.js */
+
+/*! ../../manipulators/getHandleNearImagePoint */
+
+/*! ../../manipulators/getHandleNearImagePoint.js */
+
+/*! ../../manipulators/index.js */
+
+/*! ../../stateManagement/loadHandlerManager.js */
+
+/*! ../../stateManagement/textStyle.js */
+
+/*! ../../stateManagement/toolColors.js */
+
+/*! ../../stateManagement/toolState.js */
+
+/*! ../../store */
+
+/*! ../../store/getActiveToolsForElement.js */
+
+/*! ../../store/getToolsWithDataForElement.js */
+
+/*! ../../store/getToolsWithMoveableHandles.js */
+
+/*! ../../store/index */
+
+/*! ../../store/index.js */
+
+/*! ../../store/setToolCursor.js */
+
+/*! ../../util/calculateSUV.js */
+
+/*! ../../util/clip.js */
+
+/*! ../../util/findAndMoveHelpers.js */
+
+/*! ../../util/freehand/index.js */
+
+/*! ../../util/getActiveTool */
+
+/*! ../../util/getCircleCoords */
+
+/*! ../../util/getPixelSpacing */
+
+/*! ../../util/getRGBPixels.js */
+
+/*! ../../util/getROITextBoxCoords.js */
+
+/*! ../../util/isEmptyObject */
+
+/*! ../../util/logger */
+
+/*! ../../util/logger.js */
+
+/*! ../../util/numbersWithCommas.js */
+
+/*! ../../util/pointInsideBoundingBox.js */
+
+/*! ../../util/segmentation */
+
+/*! ../../util/segmentation/index.js */
+
+/*! ../../util/throttle */
+
+/*! ../../util/triggerEvent.js */
+
+/*! ../../utils/getDistanceWithPixelSpacing */
+
+/*! ../../utils/getDistanceWithPixelSpacing.js */
+
+/*! ../../utils/getLineVector */
+
+/*! ../../utils/getLineVector.js */
+
+/*! ../BidirectionalTool */
+
+/*! ../base */
+
+/*! ../base/BaseAnnotationTool.js */
+
+/*! ../colors/index.js */
+
+/*! ../cursors */
+
+/*! ../cursors/index.js */
+
+/*! ../drawing/drawHandles.js */
+
+/*! ../drawing/drawTextBox.js */
+
+/*! ../drawing/index.js */
+
+/*! ../eventListeners/onImageRenderedBrushEventHandler.js */
+
+/*! ../events.js */
+
+/*! ../externalModules */
+
+/*! ../externalModules.js */
+
+/*! ../getBaseData.js */
+
+/*! ../getCircleCoords */
+
+/*! ../helpers/typeof */
+
+/*! ../index.js */
+
+/*! ../internal/computeAutoVoi.js */
+
+/*! ../internal/drawImageSync.js */
+
+/*! ../internal/generateColorLut.js */
+
+/*! ../internal/generateLut.js */
+
+/*! ../internal/getDefaultViewport.js */
+
+/*! ../internal/now.js */
+
+/*! ../internal/storedColorPixelDataToCanvasImageData.js */
+
+/*! ../internal/storedPixelDataToCanvasImageData.js */
+
+/*! ../internal/storedPixelDataToCanvasImageDataColorLUT.js */
+
+/*! ../internal/storedPixelDataToCanvasImageDataPseudocolorLUT.js */
+
+/*! ../internal/storedPixelDataToCanvasImageDataRGBA.js */
+
+/*! ../internal/storedRGBAPixelDataToCanvasImageData.js */
+
+/*! ../internal/tryEnableWebgl.js */
+
+/*! ../layers.js */
+
+/*! ../lib.js */
+
+/*! ../logger.js */
+
+/*! ../manipulators/getHandleNearImagePoint.js */
+
+/*! ../mixins/index.js */
+
+/*! ../orientation/index.js */
+
+/*! ../rendering/renderColorImage.js */
+
+/*! ../rendering/renderGrayscaleImage.js */
+
+/*! ../rendering/renderLabelMapImage.js */
+
+/*! ../rendering/renderPseudoColorImage.js */
+
+/*! ../requestPool/requestPoolManager.js */
+
+/*! ../setToPixelCoordinateSystem.js */
+
+/*! ../setToolMode */
+
+/*! ../stateManagement/loadHandlerManager.js */
+
+/*! ../stateManagement/textStyle.js */
+
+/*! ../stateManagement/toolColors.js */
+
+/*! ../stateManagement/toolState */
+
+/*! ../stateManagement/toolState.js */
+
+/*! ../stateManagement/toolStyle.js */
+
+/*! ../store */
+
+/*! ../store/ */
+
+/*! ../store/filterToolsUsableWithMultiPartTools */
+
+/*! ../store/getActiveToolsForElement */
+
+/*! ../store/getToolForElement.js */
+
+/*! ../store/index.js */
+
+/*! ../store/setToolCursor.js */
+
+/*! ../store/setToolMode.js */
+
+/*! ../toolOptions.js */
+
+/*! ../tools/base/BaseAnnotationTool */
+
+/*! ../tools/base/BaseAnnotationTool.js */
+
+/*! ../tools/base/BaseBrushTool.js */
+
+/*! ../triggerEvent.js */
+
+/*! ../util/angleBetweenPoints.js */
+
+/*! ../util/calculateSUV.js */
+
+/*! ../util/clip.js */
+
+/*! ../util/convertToVector3.js */
+
+/*! ../util/copyPoints.js */
+
+/*! ../util/freehand/index.js */
+
+/*! ../util/getActiveTool */
+
+/*! ../util/getLuminance.js */
+
+/*! ../util/getMaxSimultaneousRequests.js */
+
+/*! ../util/getRGBPixels.js */
+
+/*! ../util/logger.js */
+
+/*! ../util/pointInsideBoundingBox.js */
+
+/*! ../util/pointProjector.js */
+
+/*! ../util/scroll.js */
+
+/*! ../util/triggerEvent */
+
+/*! ../util/triggerEvent.js */
+
+/*! ../util/uuidv4.js */
+
+/*! ../util/wait.js */
+
+/*! ../util/zoom/index.js */
+
+/*! ../utils/getDistanceWithPixelSpacing.js */
+
+/*! ../webgl/index.js */
+
+/*! ./../../../../../externalModules.js */
+
+/*! ./../../../../events.js */
+
+/*! ./../../../../externalModules.js */
+
+/*! ./../../../drawing/drawHandles.js */
+
+/*! ./../../../drawing/drawLinkedTextBox.js */
+
+/*! ./../../../drawing/index.js */
+
+/*! ./../../../events.js */
+
+/*! ./../../../externalModules.js */
+
+/*! ./../../../manipulators/anyHandlesOutsideImage.js */
+
+/*! ./../../../manipulators/getHandleNearImagePoint.js */
+
+/*! ./../../../manipulators/index.js */
+
+/*! ./../../../node_modules/process/browser.js */
+
+/*! ./../../../stateManagement/toolColors.js */
+
+/*! ./../../../stateManagement/toolCoordinates.js */
+
+/*! ./../../../stateManagement/toolState.js */
+
+/*! ./../../../stateManagement/toolStyle.js */
+
+/*! ./../../../util/pointInsideBoundingBox.js */
+
+/*! ./../../drawing/drawArrow.js */
+
+/*! ./../../drawing/drawHandles.js */
+
+/*! ./../../drawing/drawLinkedTextBox.js */
+
+/*! ./../../drawing/drawTextBox.js */
+
+/*! ./../../drawing/index.js */
+
+/*! ./../../events.js */
+
+/*! ./../../externalModules.js */
+
+/*! ./../../manipulators/anyHandlesOutsideImage.js */
+
+/*! ./../../manipulators/handleActivator.js */
+
+/*! ./../../manipulators/index.js */
+
+/*! ./../../mixins/index.js */
+
+/*! ./../../stateManagement/textStyle.js */
+
+/*! ./../../stateManagement/toolColors.js */
+
+/*! ./../../stateManagement/toolState.js */
+
+/*! ./../../stateManagement/toolStyle.js */
+
+/*! ./../../store/filterToolsUsableWithMultiPartTools.js */
+
+/*! ./../../store/getActiveToolsForElement.js */
+
+/*! ./../../store/getInteractiveToolsForElement.js */
+
+/*! ./../../store/getToolsWithDataForElement.js */
+
+/*! ./../../store/index.js */
+
+/*! ./../../store/isToolActiveForElement.js */
+
+/*! ./../../tools/base/BaseAnnotationTool.js */
+
+/*! ./../../util/calculateSUV.js */
+
+/*! ./../../util/convertToVector3.js */
+
+/*! ./../../util/deepmerge.js */
+
+/*! ./../../util/ellipse/index.js */
+
+/*! ./../../util/findAndMoveHelpers.js */
+
+/*! ./../../util/lineSegDistance.js */
+
+/*! ./../../util/numbersWithCommas.js */
+
+/*! ./../../util/pointInsideBoundingBox.js */
+
+/*! ./../../util/pointProjector.js */
+
+/*! ./../../util/roundToDecimal.js */
+
+/*! ./../../util/segmentation */
+
+/*! ./../../util/throttle.js */
+
+/*! ./../../util/triggerEvent.js */
+
+/*! ./../addTool.js */
+
+/*! ./../base/BaseAnnotationTool.js */
+
+/*! ./../base/BaseBrushTool.js */
+
+/*! ./../events.js */
+
+/*! ./../externalModules.js */
+
+/*! ./../manipulators/index.js */
+
+/*! ./../setToolMode.js */
+
+/*! ./../shared/customCallbackHandler.js */
+
+/*! ./../stateManagement/textStyle.js */
+
+/*! ./../stateManagement/toolColors.js */
+
+/*! ./../stateManagement/toolState.js */
+
+/*! ./../stateManagement/toolStyle.js */
+
+/*! ./../store/index.js */
+
+/*! ./../util/getDefault.js */
+
+/*! ./../util/triggerEvent.js */
+
+/*! ./AngleTool.js */
+
+/*! ./ArrowAnnotateTool.js */
+
+/*! ./BaseAnnotationTool.js */
+
+/*! ./BaseBrushTool.js */
+
+/*! ./BaseTool.js */
+
+/*! ./BidirectionalTool.js */
+
+/*! ./BrushTool */
+
+/*! ./CircleRoiTool.js */
+
+/*! ./CircleScissorsTool */
+
+/*! ./ClickedLineData.js */
+
+/*! ./CobbAngleTool.js */
+
+/*! ./CorrectionScissorsTool */
+
+/*! ./CrosshairsTool.js */
+
+/*! ./DoubleTapFitToWindowTool.js */
+
+/*! ./DragProbeTool.js */
+
+/*! ./EllipticalRoiTool.js */
+
+/*! ./EraserTool.js */
+
+/*! ./FreehandHandleData.js */
+
+/*! ./FreehandLineFinder.js */
+
+/*! ./FreehandRoiSculptorTool.js */
+
+/*! ./FreehandRoiTool.js */
+
+/*! ./FreehandScissorsTool */
+
+/*! ./LengthTool.js */
+
+/*! ./MagnifyTool.js */
+
+/*! ./MouseCursor.js */
+
+/*! ./OrientationMarkersTool.js */
+
+/*! ./OverlayTool.js */
+
+/*! ./PanMultiTouchTool.js */
+
+/*! ./PanTool.js */
+
+/*! ./ProbeTool.js */
+
+/*! ./RectangleRoiTool.js */
+
+/*! ./RectangleScissorsTool */
+
+/*! ./ReferenceLinesTool.js */
+
+/*! ./RotateTool.js */
+
+/*! ./RotateTouchTool.js */
+
+/*! ./ScaleOverlayTool.js */
+
+/*! ./SphericalBrushTool */
+
+/*! ./StackScrollMouseWheelTool.js */
+
+/*! ./StackScrollMultiTouchTool.js */
+
+/*! ./StackScrollTool.js */
+
+/*! ./TextMarkerTool.js */
+
+/*! ./WwwcRegionTool.js */
+
+/*! ./WwwcTool.js */
+
+/*! ./ZoomMouseWheelTool.js */
+
+/*! ./ZoomTool.js */
+
+/*! ./ZoomTouchPinchTool.js */
+
+/*! ./activeLabelmapIndex */
+
+/*! ./activeOrDisabledBinaryTool.js */
+
+/*! ./activeSegmentIndex */
+
+/*! ./addLabelmap2D */
+
+/*! ./addLabelmap3D */
+
+/*! ./addLine.js */
+
+/*! ./addNewMeasurement.js */
+
+/*! ./anyHandlesOutsideImage.js */
+
+/*! ./arrayTypes */
+
+/*! ./arrayWithHoles */
+
+/*! ./arrayWithoutHoles */
+
+/*! ./assertThisInitialized */
+
+/*! ./base/BaseTool.js */
+
+/*! ./bidirectionalTool/addNewMeasurement.js */
+
+/*! ./bidirectionalTool/createNewMeasurement.js */
+
+/*! ./bidirectionalTool/handleSelectedCallback.js */
+
+/*! ./bidirectionalTool/handleSelectedMouseCallback.js */
+
+/*! ./bidirectionalTool/handleSelectedTouchCallback.js */
+
+/*! ./bidirectionalTool/mouseMoveCallback.js */
+
+/*! ./bidirectionalTool/pointNearTool.js */
+
+/*! ./bidirectionalTool/renderToolData.js */
+
+/*! ./bidirectionalTool/utils/calculateLongestAndShortestDiameters */
+
+/*! ./calculateEllipseStatistics.js */
+
+/*! ./calculateFreehandStatistics.js */
+
+/*! ./calculateReferenceLine.js */
+
+/*! ./calculateTransform.js */
+
+/*! ./canvasToPixel.js */
+
+/*! ./changeViewportScale.js */
+
+/*! ./clip.js */
+
+/*! ./colorLUT */
+
+/*! ./colormap.js */
+
+/*! ./colors/colormap.js */
+
+/*! ./colors/index.js */
+
+/*! ./common.js */
+
+/*! ./correctShift.js */
+
+/*! ./correction */
+
+/*! ./createProgramFromString.js */
+
+/*! ./createViewport.js */
+
+/*! ./cursors/index.js */
+
+/*! ./debounce.js */
+
+/*! ./debugLib/index.js */
+
+/*! ./defaultConfiguration */
+
+/*! ./deleteSegment */
+
+/*! ./disable.js */
+
+/*! ./displayImage.js */
+
+/*! ./doesImageNeedToBeRendered.js */
+
+/*! ./draw.js */
+
+/*! ./drawArrow.js */
+
+/*! ./drawBrush */
+
+/*! ./drawCircle.js */
+
+/*! ./drawCompositeImage.js */
+
+/*! ./drawEllipse.js */
+
+/*! ./drawHandles.js */
+
+/*! ./drawImage.js */
+
+/*! ./drawInvalidated.js */
+
+/*! ./drawJoinedLines.js */
+
+/*! ./drawLine.js */
+
+/*! ./drawLines.js */
+
+/*! ./drawLink.js */
+
+/*! ./drawLinkedTextBox.js */
+
+/*! ./drawRect.js */
+
+/*! ./drawTextBox.js */
+
+/*! ./drawing/drawArrow.js */
+
+/*! ./drawing/drawHandles.js */
+
+/*! ./drawing/drawLink.js */
+
+/*! ./drawing/drawLinkedTextBox.js */
+
+/*! ./drawing/drawTextBox.js */
+
+/*! ./drawing/index.js */
+
+/*! ./enable.js */
+
+/*! ./enabledElementData.js */
+
+/*! ./enabledElements.js */
+
+/*! ./enabledOrDisabledBinaryTool.js */
+
+/*! ./eraseCircle */
+
+/*! ./eraseFreehand */
+
+/*! ./eraseIfSegmentIndex */
+
+/*! ./eraseIfSegmentIndex.js */
+
+/*! ./eraseOutsideBoundingBox */
+
+/*! ./eraseRectangle.js */
+
+/*! ./eraseShape */
+
+/*! ./eventListeners/windowResizeHandler.js */
+
+/*! ./events.js */
+
+/*! ./externalModules.js */
+
+/*! ./falseColorMapping.js */
+
+/*! ./fillBox.js */
+
+/*! ./fillCircle */
+
+/*! ./fillFreehand */
+
+/*! ./fillOutsideBoundingBox */
+
+/*! ./fillOutsideRect.js */
+
+/*! ./fillRectangle */
+
+/*! ./fillShape */
+
+/*! ./fillTextLines.js */
+
+/*! ./fitToWindow.js */
+
+/*! ./floodFill */
+
+/*! ./freehandArea.js */
+
+/*! ./freehandIntersect.js */
+
+/*! ./freehandSegmentationMixin */
+
+/*! ./fusionRenderer.js */
+
+/*! ./generateLut.js */
+
+/*! ./generateUUID.js */
+
+/*! ./getBoundingBoxAroundCircle */
+
+/*! ./getBoundingBoxAroundPolygon */
+
+/*! ./getBrushColor */
+
+/*! ./getCircle */
+
+/*! ./getDefaultViewport.js */
+
+/*! ./getDefaultViewportForImage.js */
+
+/*! ./getDiffBetweenPixelData */
+
+/*! ./getDirectionMultiplier */
+
+/*! ./getElement */
+
+/*! ./getHandleNearImagePoint.js */
+
+/*! ./getHelperLine.js */
+
+/*! ./getImage.js */
+
+/*! ./getImageFitScale.js */
+
+/*! ./getImageSize.js */
+
+/*! ./getLabelmap2D */
+
+/*! ./getLabelmapBuffers */
+
+/*! ./getLabelmapStats */
+
+/*! ./getLabelmaps3D */
+
+/*! ./getLineVector */
+
+/*! ./getLut.js */
+
+/*! ./getModalityLUT.js */
+
+/*! ./getMovingPoint */
+
+/*! ./getNewContext.js */
+
+/*! ./getOrientationString.js */
+
+/*! ./getPixelPathBetweenPixels */
+
+/*! ./getPixels.js */
+
+/*! ./getSegmentOfActiveLabelmapAtEvent */
+
+/*! ./getSegmentsOnPixeldata */
+
+/*! ./getStoredPixels.js */
+
+/*! ./getToolForElement.js */
+
+/*! ./getTransform.js */
+
+/*! ./getVOILut.js */
+
+/*! ./getViewport.js */
+
+/*! ./handleActivator.js */
+
+/*! ./history */
+
+/*! ./imageCache.js */
+
+/*! ./imageIdSpecificStateManager.js */
+
+/*! ./imageLoader.js */
+
+/*! ./imageRenderedEventDispatcher.js */
+
+/*! ./importInternal.js */
+
+/*! ./index.js */
+
+/*! ./init.js */
+
+/*! ./initializeRenderCanvas.js */
+
+/*! ./insertOrDelete.js */
+
+/*! ./int16.js */
+
+/*! ./int8.js */
+
+/*! ./internal/calculateTransform.js */
+
+/*! ./internal/drawImage.js */
+
+/*! ./internal/drawImageSync.js */
+
+/*! ./internal/generateLut.js */
+
+/*! ./internal/getCanvas.js */
+
+/*! ./internal/getDefaultViewport.js */
+
+/*! ./internal/getImageFitScale.js */
+
+/*! ./internal/getImageSize.js */
+
+/*! ./internal/getModalityLUT.js */
+
+/*! ./internal/getTransform.js */
+
+/*! ./internal/guid.js */
+
+/*! ./internal/index.js */
+
+/*! ./internal/now.js */
+
+/*! ./internal/requestAnimationFrame.js */
+
+/*! ./internal/setDefaultViewport.js */
+
+/*! ./internal/storedColorPixelDataToCanvasImageData.js */
+
+/*! ./internal/storedPixelDataToCanvasImageData.js */
+
+/*! ./internal/storedPixelDataToCanvasImageDataColorLUT.js */
+
+/*! ./internal/storedPixelDataToCanvasImageDataPseudocolorLUT.js */
+
+/*! ./internal/tryEnableWebgl.js */
+
+/*! ./internals/normalizeWheel.js */
+
+/*! ./internals/renderSegmentation.js */
+
+/*! ./invalidate.js */
+
+/*! ./invalidateImageId.js */
+
+/*! ./invertHandles.js */
+
+/*! ./invertOrientationString.js */
+
+/*! ./isObject.js */
+
+/*! ./isPerpendicularEndFixed.js */
+
+/*! ./isSameSegment */
+
+/*! ./isSameSegment.js */
+
+/*! ./iterableToArray */
+
+/*! ./iterableToArrayLimit */
+
+/*! ./layers.js */
+
+/*! ./lib.js */
+
+/*! ./lineHasLength.js */
+
+/*! ./lookupTable.js */
+
+/*! ./lutMatches.js */
+
+/*! ./manipulators/index.js */
+
+/*! ./metaData.js */
+
+/*! ./metadata */
+
+/*! ./mixins/index.js */
+
+/*! ./modules/cursorModule.js */
+
+/*! ./modules/globalConfigurationModule.js */
+
+/*! ./modules/manipulatorStateModule */
+
+/*! ./modules/segmentationModule */
+
+/*! ./mouseDown.js */
+
+/*! ./mouseDownActivate.js */
+
+/*! ./mouseDrag.js */
+
+/*! ./mouseEventHandlers/index.js */
+
+/*! ./mouseEventListeners.js */
+
+/*! ./mouseMove.js */
+
+/*! ./mouseToolEventDispatcher.js */
+
+/*! ./moveAllHandles.js */
+
+/*! ./moveHandle.js */
+
+/*! ./moveHandle/moveHandle.js */
+
+/*! ./moveHandle/touchMoveHandle.js */
+
+/*! ./moveLongLine/moveLongLine.js */
+
+/*! ./moveNewHandle.js */
+
+/*! ./movePerpendicularLine/movePerpendicularLine.js */
+
+/*! ./multiTouchDrag.js */
+
+/*! ./newImageEventDispatcher.js */
+
+/*! ./nonIterableRest */
+
+/*! ./nonIterableSpread */
+
+/*! ./now.js */
+
+/*! ./orientation/index.js */
+
+/*! ./pageToPixel.js */
+
+/*! ./path.js */
+
+/*! ./pixelDataToFalseColorData.js */
+
+/*! ./pixelToCanvas.js */
+
+/*! ./pointInEllipse.js */
+
+/*! ./pointInFreehand.js */
+
+/*! ./preventGhostClick.js */
+
+/*! ./referenceLines/renderActiveReferenceLine.js */
+
+/*! ./register.js */
+
+/*! ./registerItem.js */
+
+/*! ./registerMixin.js */
+
+/*! ./registerModule.js */
+
+/*! ./renderColorImage.js */
+
+/*! ./renderGrayscaleImage.js */
+
+/*! ./renderLabelMapImage.js */
+
+/*! ./renderPseudoColorImage.js */
+
+/*! ./renderSegmentationFill */
+
+/*! ./renderSegmentationOutline */
+
+/*! ./renderToCanvas.js */
+
+/*! ./renderWebImage.js */
+
+/*! ./renderer.js */
+
+/*! ./rendering/index.js */
+
+/*! ./rendering/renderColorImage.js */
+
+/*! ./rendering/renderGrayscaleImage.js */
+
+/*! ./rendering/renderLabelMapImage.js */
+
+/*! ./rendering/renderPseudoColorImage.js */
+
+/*! ./rendering/renderToCanvas.js */
+
+/*! ./rendering/renderWebImage.js */
+
+/*! ./requestAnimationFrame.js */
+
+/*! ./requestPool/requestPoolManager.js */
+
+/*! ./reset.js */
+
+/*! ./resetCanvasContextTransform.js */
+
+/*! ./resize.js */
+
+/*! ./rgb.js */
+
+/*! ./runtime */
+
+/*! ./saveLastRendered.js */
+
+/*! ./scrollToIndex.js */
+
+/*! ./segmentVisibility.js */
+
+/*! ./segmentation/circleSegmentationMixin.js */
+
+/*! ./segmentation/freehandSegmentationMixin.js */
+
+/*! ./segmentation/polylineSegmentationMixin.js */
+
+/*! ./segmentation/rectangleSegmentationMixin.js */
+
+/*! ./segmentation/renderBrushMixin.js */
+
+/*! ./setDefaultViewport.js */
+
+/*! ./setHandlesPosition.js */
+
+/*! ./setLabelmap3D.js */
+
+/*! ./setPrototypeOf */
+
+/*! ./setRadius */
+
+/*! ./setShadow.js */
+
+/*! ./setToPixelCoordinateSystem.js */
+
+/*! ./setToolCursor.js */
+
+/*! ./setViewport.js */
+
+/*! ./shaders/index.js */
+
+/*! ./shared/deactivateAllToolInstances.js */
+
+/*! ./stackTools/playClip.js */
+
+/*! ./stackTools/stackPrefetch.js */
+
+/*! ./stackTools/stackRenderers.js */
+
+/*! ./state */
+
+/*! ./stateManagement/frameOfReferenceStateManager.js */
+
+/*! ./stateManagement/imageIdSpecificStateManager.js */
+
+/*! ./stateManagement/loadHandlerManager.js */
+
+/*! ./stateManagement/stackSpecificStateManager.js */
+
+/*! ./stateManagement/textStyle.js */
+
+/*! ./stateManagement/toolColors.js */
+
+/*! ./stateManagement/toolCoordinates.js */
+
+/*! ./stateManagement/toolState.js */
+
+/*! ./stateManagement/toolStyle.js */
+
+/*! ./store/addTool.js */
+
+/*! ./store/getToolForElement.js */
+
+/*! ./store/index.js */
+
+/*! ./store/internals/addEnabledElement.js */
+
+/*! ./store/internals/removeEnabledElement.js */
+
+/*! ./store/isToolActiveForElement */
+
+/*! ./store/removeTool.js */
+
+/*! ./store/setToolMode.js */
+
+/*! ./store/setToolOptions.js */
+
+/*! ./storedColorPixelDataToCanvasImageData.js */
+
+/*! ./storedPixelDataToCanvasImageData.js */
+
+/*! ./storedPixelDataToCanvasImageDataColorLUT.js */
+
+/*! ./storedPixelDataToCanvasImageDataPseudocolorLUT.js */
+
+/*! ./storedPixelDataToCanvasImageDataRGBA.js */
+
+/*! ./strategies */
+
+/*! ./synchronization/Synchronizer.js */
+
+/*! ./synchronization/panZoomSynchronizer.js */
+
+/*! ./synchronization/stackImageIndexSynchronizer.js */
+
+/*! ./synchronization/stackImagePositionOffsetSynchronizer.js */
+
+/*! ./synchronization/stackImagePositionSynchronizer.js */
+
+/*! ./synchronization/stackScrollSynchronizer.js */
+
+/*! ./synchronization/updateImageSynchronizer.js */
+
+/*! ./synchronization/wwwcSynchronizer.js */
+
+/*! ./tap.js */
+
+/*! ./textureCache.js */
+
+/*! ./thirdParty/register.js */
+
+/*! ./thirdParty/registerSome.js */
+
+/*! ./toolState.js */
+
+/*! ./tools/annotation/index.js */
+
+/*! ./tools/base/BaseAnnotationTool.js */
+
+/*! ./tools/base/BaseBrushTool.js */
+
+/*! ./tools/base/BaseTool.js */
+
+/*! ./tools/cursors/MouseCursor.js */
+
+/*! ./tools/cursors/index.js */
+
+/*! ./tools/index.js */
+
+/*! ./tools/segmentation/index.js */
+
+/*! ./touchEventHandlers/index.js */
+
+/*! ./touchEventListeners.js */
+
+/*! ./touchStart.js */
+
+/*! ./touchStartActive.js */
+
+/*! ./touchToolEventDispatcher.js */
+
+/*! ./transform.js */
+
+/*! ./transformCanvasContext.js */
+
+/*! ./triggerEvent.js */
+
+/*! ./triggerLabelmapModifiedEvent */
+
+/*! ./uint16.js */
+
+/*! ./uint8.js */
+
+/*! ./updateImage.js */
+
+/*! ./updatePerpendicularLine.js */
+
+/*! ./util/SaveAs.js */
+
+/*! ./util/angleBetweenPoints.js */
+
+/*! ./util/calculateSUV.js */
+
+/*! ./util/clip.js */
+
+/*! ./util/convertToVector3.js */
+
+/*! ./util/copyPoints.js */
+
+/*! ./util/debounce */
+
+/*! ./util/deepmerge */
+
+/*! ./util/ellipse/index.js */
+
+/*! ./util/findAndMoveHelpers.js */
+
+/*! ./util/freehand/index.js */
+
+/*! ./util/getActiveTool */
+
+/*! ./util/getDefault */
+
+/*! ./util/getKeyPressData */
+
+/*! ./util/getLuminance.js */
+
+/*! ./util/getMaxSimultaneousRequests.js */
+
+/*! ./util/getPixelSpacing */
+
+/*! ./util/getRGBPixels.js */
+
+/*! ./util/getROITextBoxCoords */
+
+/*! ./util/isEmptyObject */
+
+/*! ./util/isObject */
+
+/*! ./util/isPointInImage */
+
+/*! ./util/isPointInPolygon */
+
+/*! ./util/lineSegDistance.js */
+
+/*! ./util/logger */
+
+/*! ./util/logger.js */
+
+/*! ./util/makeUnselectable.js */
+
+/*! ./util/numbersWithCommas.js */
+
+/*! ./util/pointInsideBoundingBox.js */
+
+/*! ./util/pointProjector.js */
+
+/*! ./util/roundToDecimal.js */
+
+/*! ./util/scroll.js */
+
+/*! ./util/scrollToIndex.js */
+
+/*! ./util/segmentation */
+
+/*! ./util/setContextToDisplayFontSize.js */
+
+/*! ./util/throttle */
+
+/*! ./util/triggerEvent.js */
+
+/*! ./util/wait */
+
+/*! ./util/zoom/index.js */
+
+/*! ./utils/updatePerpendicularLineHandles.js */
+
+/*! ./validator.js */
+
+/*! ./version.js */
+
+/*! ./vertexShader.js */
+
+/*! ./webgl/index.js */
+
+/*! ./wheelEventListener.js */
+
+/*! @babel/runtime/helpers/assertThisInitialized */
+
+/*! @babel/runtime/helpers/asyncToGenerator */
+
+/*! @babel/runtime/helpers/classCallCheck */
+
+/*! @babel/runtime/helpers/createClass */
+
+/*! @babel/runtime/helpers/defineProperty */
+
+/*! @babel/runtime/helpers/getPrototypeOf */
+
+/*! @babel/runtime/helpers/inherits */
+
+/*! @babel/runtime/helpers/possibleConstructorReturn */
+
+/*! @babel/runtime/helpers/slicedToArray */
+
+/*! @babel/runtime/helpers/toConsumableArray */
+
+/*! @babel/runtime/helpers/typeof */
+
+/*! @babel/runtime/regenerator */
+
+/*! CharLS.js - v2.0.1 - 2016-06-08 | (c) 2016 Chris Hafey | https://github.com/chafey/charls */
+
+/*! Hammer.JS - v2.0.7 - 2016-04-22
+ * http://hammerjs.github.io/
+ *
+ * Copyright (c) 2016 Jorik Tangelder;
+ * Licensed under the MIT license */
+
+/*! cornerstone-core - 2.3.0 - 2019-07-03 | (c) 2016 Chris Hafey | https://github.com/cornerstonejs/cornerstone */
+
+/*! cornerstone-math - 0.1.9 - 2020-10-01 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneMath */
+
+/*! cornerstone-tools - 5.3.0 - 2021-08-25 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/cornerstoneTools */
+
+/*! dicom-parser - 1.8.5 - 2021-08-16 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/dicomParser */
+
+/*! image-JPEG2000 - v0.3.1 - 2015-08-26 | https://github.com/OHIF/image-JPEG2000 */
+
+/*! ms */
+
+/*! regenerator-runtime */
+
+/*! sheetjs (C) 2013-present SheetJS -- http://sheetjs.com */
+
+/*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
+
+/*!***************************************************
+* mark.js v8.11.1
+* https://markjs.io/
+* Copyright (c) 2014–2018, Julian Kühnel
+* Released under the MIT license https://git.io/vwTVl
+*****************************************************/
+
+/** @license React v0.20.2
+ * scheduler.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v17.0.2
+ * react-dom.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v17.0.2
+ * react-jsx-runtime.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v17.0.2
+ * react.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
