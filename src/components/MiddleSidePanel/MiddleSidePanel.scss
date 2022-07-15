@@ -57,6 +57,10 @@
           border: 1px solid transparent;
           padding: 0 10px 0 5px;
 
+          .action {
+            flex: 2;
+          }
+
           .lung,
           .lobe {
             flex: 2;
@@ -103,6 +107,12 @@
               border: 1px solid #ccc;
               background: #eaeaea;
             }
+          }
+
+          .action {
+            flex: 2;
+            color: red;
+            cursor: pointer;
           }
 
           .lung,
@@ -251,13 +261,5 @@
 
 .ant-checkbox-wrapper {
   justify-content: space-between;
-  flex: 3 !important;
-}
-
-.ant-popover-inner-content {
-  padding: 0 !important;
-}
-
-.ant-descriptions-item-content {
-  font-size: 13px !important;
+  flex: 4 !important;
 }

@@ -1,6 +1,6 @@
 import React, { useState, createRef, useEffect } from 'react'
 import './MiddleSidePanel.scss'
-import { Checkbox, Button, Input, Descriptions, message } from 'antd'
+import { Checkbox, Button, Input, Descriptions, Popconfirm  } from 'antd'
 
 const { TextArea } = Input
 
@@ -20,8 +20,8 @@ const MiddleSidePanel = props => {
   }, [props.noduleSuggest])
 
   const handleSave = () => {
-    textAreaRef.current.blur()
-    message.success(`结节总结信息添加成功 `)
+    props.handleTextareaOnChange(suggest)
+    // textAreaRef.current.blur()
   }
 
   return (
@@ -38,6 +38,11 @@ const MiddleSidePanel = props => {
                 ? '男'
                 : '女'}
             </Descriptions.Item>
+            <Descriptions.Item label="年龄">
+              {props.data.patientBirthday && props.data.patientBirthday.toString().slice(0, 2) > 18
+                ? new Date().getFullYear() - Number(props.data.patientBirthday.toString().slice(0, 4))
+                : '**'}
+            </Descriptions.Item>
             <Descriptions.Item label="病人ID">{props.data.patientID}</Descriptions.Item>
             <Descriptions.Item label="检查时间">{props.data.acquisitionDate}</Descriptions.Item>
           </Descriptions>
@@ -53,6 +58,7 @@ const MiddleSidePanel = props => {
               <div className="lobe">肺叶</div>
               <div className="type">类型</div>
               <div className="suggest">建议</div>
+              <div className="action">操作</div>
             </div>
             <div id="tableIItemBox" className="table-content">
               {props.noduleList?.map((item, index) => (
@@ -68,6 +74,11 @@ const MiddleSidePanel = props => {
                   <div className="lobe">{item.lobe}</div>
                   <div className="type">{item.type}</div>
                   <div className="suggest">{item.suggest}</div>
+                  <div className="action">
+                    <Popconfirm title="确定删除该结节信息？" okText="确定" cancelText="取消" placement="topRight" onConfirm={e => props.handleDeleteNode(e, item)}>
+                      删除
+                    </Popconfirm>
+                  </div>
                 </div>
               ))}
             </div>
@@ -91,7 +102,6 @@ const MiddleSidePanel = props => {
                     }}
                     value={suggest}
                     onChange={e => setSuggest(e.target.value)}
-                    onBlur={e => props.handleTextareaOnChange(suggest)}
                   />
                 </div>
                 <div className="save">

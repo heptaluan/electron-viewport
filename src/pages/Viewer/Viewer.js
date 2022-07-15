@@ -16,12 +16,14 @@ import {
   queryNodeList,
   SQLContainer,
   queryAllNodeList,
-  updateSeriesSuggest,
   querySeriesSuggest,
 } from '../../util/sqlite'
-import { downloadFile } from '../../util/index'
+import useWindowSize from '../../hook/useWindowSize'
+import {deleteNodeAPI, downloadFile, updateSuggestAPI} from '../../util/index'
 
 const Viewer = props => {
+  const size = useWindowSize()
+
   // 初始化
   // eslint-disable-next-line no-unused-vars
   const [imagesConfig, setImagesConfig] = useState([])
@@ -139,6 +141,7 @@ const Viewer = props => {
 
     // 默认灰阶调节
     cornerstoneTools.setToolActive('Wwwc', { mouseButtonMask: 1 })
+    cornerstoneTools.setToolActive('Wwwc', { mouseButtonMask: 2 })
   }
 
   // 格式化结节数据
@@ -160,19 +163,15 @@ const Viewer = props => {
         lobe: item.lobeLocation,
         type: item.featureLabel,
         featureLabelG: item.featureLabel,
-        noduleSize: item.noduleSize,
         suggest: item.suggest,
         nodeBox: nodeBox,
-        diameter: item.diameter,
-        maxHu: item.maxHu,
-        minHu: item.minHu,
-        meanHu: item.meanHu,
       })
 
       index++
 
       nodulesMapList.push({
         noduleName: item.noduleName,
+        noduleNum: item.noduleNum,
         index: item.imageIndex,
         startX: nodeBox[0],
         startY: nodeBox[1],
@@ -213,7 +212,7 @@ const Viewer = props => {
 
   // 添加结节标注
   const addNodeTool = (cornerstoneElement, index = 0) => {
-    const item = nodeRef.current.noduleMapList.filter(item => Number(item.index) === index)
+    const item = nodeRef.current.noduleMapList.filter(item => Number(item.index) === Number(index))
     const checkItme = nodeRef.current.noduleList.find(item => item.checked === true)
 
     if (item.length >= 1) {
@@ -268,6 +267,9 @@ const Viewer = props => {
           cornerstoneTools.addToolState(cornerstoneElement, 'MarkNodule', measurementData)
         }
       }
+      cornerstone.updateImage(cornerstoneElement)
+    } else {
+      cornerstoneTools.clearToolState(cornerstoneElement, 'MarkNodule')
       cornerstone.updateImage(cornerstoneElement)
     }
   }
@@ -384,15 +386,8 @@ const Viewer = props => {
         lungLocation: item.lung,
         lobeLocation: item.lobe,
         featureLabel: item.type,
-        noduleSize: item.noduleSize,
         suggest: item.suggest,
         nodeBox: item.nodeBox.toString(),
-        diameter: item.diameter,
-        maxHu: item.maxHu,
-        minHu: item.minHu,
-        meanHu: item.meanHu,
-        diameterNorm: item.diameterNorm,
-        centerHu: item.centerHu,
       },
     ]
     return postData
@@ -464,6 +459,7 @@ const Viewer = props => {
     }
   }
 
+  // 新增结节列表
   const handleOk = e => {
     for (let i = 0; i < toolList.length; i++) {
       if (!toolList[i].lung) {
@@ -490,7 +486,6 @@ const Viewer = props => {
     const startY = toolData.handles.start.y.toFixed(2)
     const endX = toolData.handles.end.x.toFixed(2)
     const endY = toolData.handles.end.y.toFixed(2)
-    const rowPixelSpacing = cornerstone.getImage(cornerstoneElement).rowPixelSpacing
 
     const imageId = cornerstone.getImage(cornerstoneElement).imageId
     const imageIndex = nodeRef.current.imagesConfig.findIndex(item => item === imageId)
@@ -505,21 +500,6 @@ const Viewer = props => {
       num: imageIndex,
       suggest: toolList[0].suggest,
       type: toolList[0].type,
-      diameter: `${(Math.abs(endX - startX) * rowPixelSpacing).toFixed(2)}mm*${(
-        Math.abs(endY - startY) * rowPixelSpacing
-      ).toFixed(2)}mm`,
-      maxHu: toolList[0].cachedStats.max,
-      minHu: toolList[0].cachedStats.min,
-      meanHu: toolList[0].cachedStats.mean.toFixed(2),
-      diameterNorm: Math.sqrt(toolList[0].cachedStats.area).toFixed(2),
-      noduleSize: (Math.pow(Math.sqrt(toolList[0].cachedStats.area) / 2, 3) * Math.PI).toFixed(2),
-      centerHu: cornerstone.getPixels(
-        cornerstoneElement,
-        (Number(startX) + Number(endX)) / 2,
-        (Number(startY) + Number(endY)) / 2,
-        1,
-        1
-      )[0],
       nodeBox: [startX, startY, endX, endY],
     }
 
@@ -545,9 +525,38 @@ const Viewer = props => {
 
     setTimeout(() => {
       addNodeTool(cornerstoneElement, imageIndex)
-    }, 500)
+    }, 200)
 
     setModalVisible(false)
+  }
+
+  // 结节列表删除
+  const handleDeleteNode = (e, item) => {
+    e.stopPropagation()
+
+    const noduleIndex = noduleList.findIndex(n => n.noduleNum === item.noduleNum)
+    const noduleMapIndex = noduleMapList.findIndex(n => n.noduleNum === item.noduleNum)
+
+    noduleList.splice(noduleIndex, 1)
+    noduleMapList.splice(noduleMapIndex, 1)
+
+    setNoduleList([...noduleList])
+    setNoduleMapList([...noduleMapList])
+
+    // deleteNodeData(item.noduleNum, () => {
+    //   message.success(`删除结节成功`)
+    // })
+
+    deleteNodeAPI({noduleNum: item.noduleNum}).then(res => {
+      // console.log('res: ', res)
+      message.success(`删除结节成功`)
+    }).catch(err => {
+      console.log(err)
+    })
+
+    setTimeout(() => {
+      addNodeTool(cornerstoneElement, item.num)
+    }, 200)
   }
 
   const handleCancel = e => {
@@ -574,8 +583,19 @@ const Viewer = props => {
     const seriesInfo = props.data.seriesInfo.find(item => item.active === true)
     const seriesNo = seriesInfo.seriesNo
     const studyId = seriesInfo.studyID
-    updateSeriesSuggest(suggest, studyId, seriesNo, res => {
+    // updateSeriesSuggest(suggest, studyId, seriesNo, res => {
+    //   message.success(`结节总结信息添加成功 `)
+    // })
+    const data = {
+      suggest,
+      studyId,
+      seriesNo
+    }
+    updateSuggestAPI({...data}).then(res => {
       message.success(`结节总结信息添加成功 `)
+      console.log('res: ', res)
+    }).catch(err => {
+      console.log(err)
     })
   }
 
@@ -685,7 +705,12 @@ const Viewer = props => {
         setShowViewer={props.setShowViewer}
         globalData={props.data}
       />
-      <div className="viewer-center-box">
+      <div
+        className="viewer-center-box"
+        style={{
+          height: `${size.height - 53}px`,
+        }}
+      >
         <LeftSidePanel patientInfo={props.data} getSelectedSeries={getSelectedSeries} />
         <ViewerMain
           handleToolbarClick={handleToolbarClick}
@@ -701,6 +726,7 @@ const Viewer = props => {
             handleCheckedListClick={handleCheckedListClick}
             onCheckChange={onCheckChange}
             handleTextareaOnChange={handleTextareaOnChange}
+            handleDeleteNode={handleDeleteNode}
             noduleList={noduleList}
           />
         </div>
@@ -747,6 +773,8 @@ const Viewer = props => {
           updateToolList={updateToolList}
           currentImageIdIndex={currentImageIdIndex}
           toolList={toolList}
+          imagesConfig={imagesConfig}
+          cornerstoneElement={cornerstoneElement}
         />
       </Modal>
     </div>

@@ -1,5 +1,12 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
+const RockeyArm = require('./RockeyArm')
+const { Menu } = require('electron')
+const { dialog } = require('electron')
+const dongle = new RockeyArm()
+const ret = dongle.Enum()
+server = require("./util/server")
+// 浏览器窗口.
 
 app.allowRendererProcessReuse = false
 
@@ -39,9 +46,23 @@ function createWindow () {
 // 创建浏览器窗口时，调用这个函数。
 // 部分 API 在 ready 事件触发后才能使用，同时隐藏菜单栏
 app.on('ready', () => {
-  createWindow()
-  const { Menu } = require('electron')
-  Menu.setApplicationMenu(null)
+  console.log(ret)
+  if (ret.result === 'success') {
+    createWindow()
+    Menu.setApplicationMenu(null)
+  } else {
+    dialog.showErrorBox('未授权', '请插入正确的加密狗在使用本软件。')
+  }
+
+  setInterval(() => {
+    const dongle = new RockeyArm()
+    const ret = dongle.Enum() 
+    console.log(ret)
+    if (ret.result !== 'success') {
+      dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
+      app.quit()
+    }
+  }, 10000)
 })
 
 // 当全部窗口关闭时退出。
@@ -49,6 +70,7 @@ app.on('window-all-closed', () => {
   // 在 macOS 上，除非用户用 Cmd + Q 确定地退出，
   // 否则绝大部分应用及其菜单栏会保持激活。
   if (process.platform !== 'darwin') {
+    server.close()
     app.quit()
   }
 })

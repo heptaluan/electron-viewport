@@ -2,6 +2,8 @@
 const path = require('path')
 const fs = require('fs')
 const sqlite = require('sqlite3')
+const winston = require('winston')
+const backupTimer = require('./config.json')
 const rootPath = path.join(__dirname, 'src')
 
 console.log('rootPath: ',rootPath)
@@ -22,3 +24,5 @@ window.sqlite = sqlite
 window.rootPath = rootPath
 window.join = path.join
 window.path = path
+window.winston = winston
+window.backupTimer = backupTimer

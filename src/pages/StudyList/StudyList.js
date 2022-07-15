@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import './StudyList.scss'
-import { Table, Input, Button, Spin, message } from 'antd'
+import { Table, Input, Button, message } from 'antd'
 import SelectFile from '../../components/SelectFile/SelectFile'
 import {
   queryStudyByPatientID,
@@ -8,10 +8,11 @@ import {
   queryPatientData,
   removeAllDuplicated,
   queryAllNodeList,
-  queryPatientList
+  queryPatientList,
+  deleteTableSql,
+  queryInstanceByStudyID,
 } from '../../util/sqlite'
-import { formatFile, downloadFile } from '../../util/index'
-
+import { formatFile, downloadFile, queryPatientAPI, createSeriesAPI } from '../../util/index'
 const dicomColumns = [
   {
     title: '姓名',
@@ -65,6 +66,7 @@ const testColumns = [
   {
     title: '检测ID',
     dataIndex: 'studyID',
+    render: (txt) => <span>{txt.split('_')[0]}</span>,
   },
   {
     title: '检测描述',
@@ -86,6 +88,7 @@ const listColumns = [
   {
     title: '序列号',
     dataIndex: 'seriesNo',
+    render: (txt) => <span>{txt.split('_')[0]}</span>,
   },
   {
     title: '序列描述',
@@ -117,14 +120,28 @@ const StudyList = props => {
   const [patientData, setPatientData] = useState([])
   const [studyData, setStudyData] = useState([])
   const [seriesData, setSeriesData] = useState([])
-  const [DICOMFiles, importDICOM] = useState([])
   const [selectedData, setSelectedData] = useState([])
-  const [isLoading, setLoading] = useState(false)
+  const [isLoading, setLoading] = useState(0)
   const [selectedRows, setSelectedRows] = useState([])
   const [searchData, setSearchData] = useState('')
 
   useEffect(() => {
-    queryPatientData(getDicomFromDB)
+    // queryPatientData(getDicomFromDB)
+    if (!isLoading) {
+      setLoading(1)
+      queryPatientAPI().then(res => {
+        getDicomFromDB(res["data"])
+        setLoading(0)
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+
+    createSeriesAPI().then(res => {
+      // console.log('res: ', res)
+    }).catch(err => {
+      console.log(err)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -140,9 +157,50 @@ const StudyList = props => {
     setStudyData(objects)
   }
 
-  const getSeriesFromDB = objects => {
-    setSeriesData(objects)
-    setLoading(false)
+  const getSeriesFromDB = (objects, loading, isSeriesGetAll) => {
+    if (objects.length > 0) {
+      queryInstanceByStudyID(objects[0].studyID, (res) => {
+        // console.log(res)
+        objects.forEach(ele => {
+          const framePath = []
+          const instanceNumber = []
+          res.forEach(x => {
+            if (ele.seriesNo === x.seriesNo) {
+              framePath.push(x.framePath)
+              instanceNumber.push(x.instanceNumber)
+              ele.frameNum ++
+            }
+          })
+          ele.instanceNumber = sortPathByInstanceNumber(instanceNumber, framePath, 0)
+          ele.framePath = sortPathByInstanceNumber(instanceNumber, framePath, 1)
+          // console.log(ele)
+        })
+        setSeriesData(objects)
+        if (isSeriesGetAll) {
+          seriesGetAll(objects)
+        }
+        if (loading) {
+          setLoading(2)
+        }
+      })
+    } else {
+      setSeriesData(objects)
+      if (loading) {
+        setLoading(2)
+      }
+    }
+  }
+
+  const sortPathByInstanceNumber = (instanceNumbers, paths, returnIndex) => {
+    const indices = [...instanceNumbers.keys()]
+    indices.sort((x,y) => instanceNumbers[x] - instanceNumbers[y])
+    paths = indices.map(i=>paths[i])
+    instanceNumbers = indices.map(i=>instanceNumbers[i])
+    if (returnIndex === 0) {
+      return instanceNumbers
+    } else if (returnIndex === 1) {
+      return paths
+    }
   }
 
   const patientRowClicked = record => {
@@ -155,7 +213,7 @@ const StudyList = props => {
 
   const getAllByPatientID = studyList => {
     selectedData.studyInfo = studyList[0]
-    querySeriesByStudyID(selectedData.studyInfo.studyID, seriesGetAll)
+    querySeriesByStudyID(selectedData.studyInfo.studyID, e => getSeriesFromDB(e, false, true))
   }
 
   const patientGetAll = record => {
@@ -164,11 +222,11 @@ const StudyList = props => {
 
   const studyGetAll = record => {
     selectedData.studyInfo = record
-    querySeriesByStudyID(record.studyID, seriesGetAll)
+    querySeriesByStudyID(record.studyID, e => getSeriesFromDB(e, false, true))
   }
 
   const seriesGetAll = (seriesList, selectedIndex) => {
-    if (selectedIndex) {
+    if (selectedIndex || selectedIndex === 0) {
       selectedData.seriesInfo = Array.isArray(seriesData) ? seriesData : [seriesData]
       selectedData.seriesInfo[selectedIndex].active = true
     } else {
@@ -184,6 +242,7 @@ const StudyList = props => {
       // check if file is inexistent when path is exists in DB
       if (res.findIndex(x => x == undefined) >= 0) {
         console.log('no file be found')
+        message.error("此序列文件缺失，请检查DICOM文件是否存在")
       } else {
         // set the dcm image as cover
         res.forEach((ele, index) => {
@@ -218,7 +277,7 @@ const StudyList = props => {
     removeAllDuplicated(getDicomFromDB)
     // 关闭 study 和 series 列表，需要手动打开
     getStudyFromDB([])
-    getSeriesFromDB([])
+    getSeriesFromDB([], true)
   }
 
   // 导出结节信息
@@ -244,8 +303,11 @@ const StudyList = props => {
     })
   }
 
-  const handleSearch = () => {
-    queryPatientList(searchData, res => {
+  const handleSearch = (type) => {
+    if (type === 'reset') {
+      setSearchData('')
+    }
+    queryPatientList(type === 'reset' ? '' : searchData, res => {
       console.log(res)
       getDicomFromDB(res)
       getStudyFromDB([])
@@ -253,19 +315,38 @@ const StudyList = props => {
     })
   }
 
+  const selectedRowStyle = (record, index) => {
+    let resource = null
+    switch (index) {
+      case 0:
+        resource = patientData
+        break;
+      case 1:
+        resource = studyData
+        break;
+      case 2:
+        resource = seriesData
+        break;
+    }
+    resource.forEach(ele => {
+      ele.styleActive = false
+      if (ele.key === record.key) {
+        ele.styleActive = true
+      }
+    })
+    if (index === 2) {
+      setSeriesData([...resource])
+    }
+  }
+
   return (
     <div className="study-list-container">
-      {isLoading ? (
-        <div className="mask">
-          <Spin size="large" />
-        </div>
-      ) : null}
       <div>
         <SelectFile
-          importDICOM={importDICOM}
           setPatientData={setPatientData}
           setData={props.setData}
           setLoading={setLoading}
+          isLoading={isLoading}
           addDicomFromUpload={addDicomFromUpload}
           removeDuplicates={removeDuplicates}
         />
@@ -276,10 +357,10 @@ const StudyList = props => {
             </div>
             <div className="search-btns">
               <Button type="primary" onClick={handleSearch}>检索</Button>
-              <Button onClick={e => setSearchData('')} type="primary">
+              <Button onClick={e=> handleSearch('reset')} type="primary">
                 重置
               </Button>
-              {/* <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
+              <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
                       删除 patient
                     </Button>
                     <Button onClick={e => deleteTableSql('dicom_study')} type="primary">
@@ -288,18 +369,24 @@ const StudyList = props => {
                     <Button onClick={e => deleteTableSql('dicom_series')} type="primary">
                       删除 series
                     </Button>
-                    <Button onClick={e => queryData(SQLContainer.queryPatientSql, printLog)} type="primary">
-                      查询 patient
+                    <Button onClick={e => deleteTableSql('dicom_instance')} type="primary">
+                      删除 instance
                     </Button>
-                    <Button onClick={e => queryData(SQLContainer.queryStudySql, printLog)} type="primary">
-                      查询 study
-                    </Button>
-                    <Button onClick={e => queryData(SQLContainer.querySeriesSql, printLog)} type="primary">
-                      查询 series
-                    </Button>
-                    <Button onClick={e => removeDuplicates } type="primary">
-                      去重 Patient
-                    </Button> */}
+              {/*<Button onClick={e => setLoading(1)} type="primary">*/}
+              {/*  loading*/}
+              {/*</Button>*/}
+              {/*<Select defaultValue={10} style={{ width: 120 }} onChange={e => changeTimeInterval(e)}>*/}
+              {/*  <Option value={10}>10</Option>*/}
+              {/*  <Option value={20}>20</Option>*/}
+              {/*  <Option value={30}>30</Option>*/}
+              {/*  <Option value={45}>45</Option>*/}
+              {/*</Select>*/}
+                    {/*<Button onClick={e => changeTimeInterval(20)} type="primary">*/}
+                    {/*  changeTimeInterval*/}
+                    {/*</Button>*/}
+                    {/*<Button onClick={e => removeDuplicates } type="primary">*/}
+                    {/*  去重 Patient*/}
+                    {/*</Button>*/}
             </div>
           </div>
         </div>
@@ -314,13 +401,17 @@ const StudyList = props => {
             }}
             columns={dicomColumns}
             dataSource={patientData}
+            showSorterTooltip={false}
+            size={'small'}
+            rowClassName={(record, index) => record['styleActive'] ? 'rowClick' : '' }
             onRow={record => {
               return {
                 onClick: () => {
                   patientRowClicked(record)
+                  selectedRowStyle(record, 0)
                 },
                 onDoubleClick: event => {
-                  console.log('Patient list: ', patientData)
+                  // console.log('Patient list: ', patientData)
                   patientGetAll(record)
                 },
               }
@@ -332,10 +423,14 @@ const StudyList = props => {
           <Table
             columns={testColumns}
             dataSource={studyData}
+            showSorterTooltip={false}
+            size={'small'}
+            rowClassName={(record, index) => record['styleActive'] ? 'rowClick' : '' }
             onRow={(record, index) => {
               return {
                 onClick: () => {
                   studyRowClicked(record, index)
+                  selectedRowStyle(record, 1)
                 },
                 onDoubleClick: event => {
                   studyGetAll(record)
@@ -349,10 +444,13 @@ const StudyList = props => {
           <Table
             columns={listColumns}
             dataSource={seriesData}
+            size={'small'}
+            rowClassName={(record, index) => record['styleActive'] ? 'rowClick' : '' }
             onRow={(record, index) => {
               return {
                 onClick: () => {
                   seriesRowClicked(record, index)
+                  selectedRowStyle(record, 2)
                 },
                 onDoubleClick: event => {
                   seriesGetAll(record, index)

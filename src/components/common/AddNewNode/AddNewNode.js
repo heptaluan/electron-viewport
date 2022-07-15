@@ -1,6 +1,7 @@
 import React from 'react'
 import './AddNewNode.scss'
 import { Radio, Select, Input } from 'antd'
+import cornerstone from 'cornerstone-core'
 
 const { Option } = Select
 
@@ -21,7 +22,9 @@ const AddNewNode = props => {
     <div className="add-new-node-box">
       <div className="title-box">
         <span className="title">当前帧数：</span>
-        <span>第 {props.currentImageIdIndex} 帧</span>
+        <span>
+          第 {props.imagesConfig.findIndex(index => index === cornerstone.getImage(props.cornerstoneElement).imageId)} 帧
+        </span>
       </div>
 
       {props.toolList?.map((item, index) => (

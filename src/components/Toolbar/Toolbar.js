@@ -121,7 +121,7 @@ const toolbarList = [
   {
     id: 18,
     text: '结节标注',
-    icon: <IconFont style={{ fontSize: '20px' }} type="icon-juxing" />,
+    icon: <IconFont style={{ fontSize: '26px' }} type="icon-juxing2" />,
     type: 'AddNodule',
     checked: false,
   },

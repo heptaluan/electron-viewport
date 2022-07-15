@@ -1,6 +1,6 @@
 {
   "name": "viewport",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "main.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
@@ -14,6 +14,7 @@
     "cornerstone-wado-image-loader": "^3.3.2",
     "dcmjs": "^0.24.0",
     "hammerjs": "^2.0.8",
+    "mark.js": "^8.11.1",
     "node-sass": "^6.0.1",
     "react": "^17.0.2",
     "react-cornerstone-viewport": "^4.1.0",
@@ -25,12 +26,16 @@
     "react-scripts": "4.0.3",
     "sqlite3": "^5.0.2",
     "web-vitals": "^1.0.1",
+    "winston": "^3.8.1",
     "xlsx": "^0.16.0",
-    "mark.js": "^8.11.1"
+    "ffi-napi": "^4.0.3",
+    "ref-array-napi": "^1.2.2",
+    "ref-napi": "^3.0.3",
+    "ref-struct-napi": "^1.1.1"
   },
   "build": {
     "extends": null,
-    "productName": "影像处理软件",
+    "productName": "医学影像处理软件",
     "appId": "com.example.app",
     "mac": {
       "target": [
@@ -55,10 +60,16 @@
       "perMachine": false,
       "allowElevation": false
     },
-    "extraResources": {
-      "from": "./db/",
-      "to": "db"
-    }
+    "extraResources": [
+      {
+        "from": "./db/",
+        "to": "db"
+      },
+      {
+        "from": "./dongle.dll",
+        "to": "./"
+      }
+    ]
   },
   "scripts": {
     "start": "electron .",

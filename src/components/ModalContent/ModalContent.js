@@ -24,7 +24,7 @@ const ModalContent = (props) => {
         let rawInfo = null
         for (let i = 0; i < props.globalData.seriesInfo.length; i ++) {
             if (props.globalData.seriesInfo[i].active) {
-                selectedPath = {path: props.globalData.seriesInfo[i].framePath.split(',')[0]}
+                selectedPath = {path: props.globalData.seriesInfo[i].framePath[0]}
             }
         }
         info = readFileInfo(selectedPath)
@@ -46,6 +46,8 @@ const ModalContent = (props) => {
     const textFormat = (txt) => {
         if (txt) {
             return txt['Value'].toString()
+        } else {
+            return
         }
     }
     const onSearch = (txt, pageIndex, next) => {
@@ -104,6 +106,9 @@ const ModalContent = (props) => {
         onSearch('', 1, 'top')
     }
     const inputChange = (e, index) => {
+        if (e.target.value == '') {
+            onSearch('', index, 'top')
+        }
         if (index === 0) {
             setInput1(e.target.value)
         } else if (index === 1) {
@@ -141,12 +146,12 @@ const ModalContent = (props) => {
                                 <div className="itemTxt">{"Patient's Name：" +textFormat(thisData.dict['00100010'])}</div>
                                 <div className="itemTxt">{"Patient's ID：" +textFormat(thisData?.dict['00100020'])}</div>
                                 <div className="itemTxt">{"Patient's Gender：" +textFormat(thisData?.dict['00100040'])}</div>
-                                <div className="itemTxt">{"Patient's Name：" +textFormat(thisData?.dict['00100030'])}</div>
+                                <div className="itemTxt">{"Patient's Birth Date：" +textFormat(thisData?.dict['00100030'])}</div>
                             </div>
                             <div className="item">
                                 <div className="itemHeader">CT机生产商信息</div>
                                 <div className="itemTxt">{"Manufacturer：" +textFormat(thisData?.dict['00080070'])}</div>
-                                <div className="itemTxt">{"Manufacturer's Model Name：" +textFormat(thisData?.dict['00081090'])}</div>
+                                <div className="itemTxt">{"Manufacturer's Model Name：" +textFormat(thisData?.dict['00081090'] ? thisData?.dict['00081090'] : 'No Model Name')}</div>
                                 <div className="itemTxt">{"Station Name：" +textFormat(thisData?.dict['00081010'])}</div>
                             </div>
                             <div className="item">
@@ -164,7 +169,7 @@ const ModalContent = (props) => {
                                 <div className="itemTxt">{"Series Time：" +dicomTimeToLocale(textFormat(thisData?.dict['00080031']))}</div>
                                 <div className="itemTxt">{"Series Number：" +textFormat(thisData?.dict['00200011'])}</div>
                                 <div className="itemTxt">{"Modality：" +textFormat(thisData?.dict['00080060'])}</div>
-                                <div className="itemTxt">{"Institution Name：" +textFormat(thisData?.dict['00080080'])}</div>
+                                <div className="itemTxt">{"Institution Name：" +textFormat(thisData?.dict['00080080'] ? thisData?.dict['00080080'] : 'No Institution')}</div>
                                 <div className="itemTxt">{"Series Description：" +textFormat(thisData?.dict['0008103E'])}</div>
                             </div>
                             <div className="item">

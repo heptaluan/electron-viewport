@@ -9,6 +9,7 @@ const CustomOverlay = props => {
 
   useEffect(() => {
     cornerstone.loadImage(props.imageId).then(image => {
+      
       const data = {
         name: image.data.string('x00100010'),
         birth: image.data.string('x00100030'),
@@ -28,6 +29,12 @@ const CustomOverlay = props => {
 
         Rowsize: image.rows,
         Colsize: image.columns,
+
+        age: '**',
+      }
+
+      if (data.birth && data.birth.toString().slice(0, 2) > 18) {
+        data.age = new Date().getFullYear() - Number(data.birth.toString().slice(0, 4))
       }
 
       setData(data)
@@ -49,6 +56,9 @@ const CustomOverlay = props => {
           </div>
           <div className="list">
             性别：<span>{data?.sex === '**' ? data?.sex : data?.sex === 'M' ? '男' : '女'}</span>
+          </div>
+          <div className="list">
+            年龄：<span>{data?.age}</span>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
