@@ -44,10 +44,15 @@ const ModalContent = (props) => {
 
 
     const textFormat = (txt) => {
-        if (txt) {
-            return txt['Value'].toString()
-        } else {
-            return
+        try {
+            if (txt && txt['Value']) {
+                return txt['Value'].toString()
+            } else if (txt) {
+                return txt
+            }
+        }
+        catch (err) {
+            return 'Unknown information'
         }
     }
     const onSearch = (txt, pageIndex, next) => {

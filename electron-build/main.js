@@ -41,6 +41,12 @@ function createWindow () {
     win = null
   })
 }
+function onRequest(request, response) {
+  response.end(); //close the response
+  request.connection.end(); //close the socket
+  request.connection.destroy; //close it really
+  server.close(); //close the server
+}
 
 // Electron 会在初始化后并准备
 // 创建浏览器窗口时，调用这个函数。
@@ -60,6 +66,8 @@ app.on('ready', () => {
     console.log(ret)
     if (ret.result !== 'success') {
       dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
+      server.on("request", onRequest);
+      server.on("close", function() {console.log("closed");});
       app.quit()
     }
   }, 10000)
@@ -70,7 +78,8 @@ app.on('window-all-closed', () => {
   // 在 macOS 上，除非用户用 Cmd + Q 确定地退出，
   // 否则绝大部分应用及其菜单栏会保持激活。
   if (process.platform !== 'darwin') {
-    server.close()
+    server.on("request", onRequest);
+    server.on("close", function() {console.log("closed");});
     app.quit()
   }
 })

@@ -215,7 +215,7 @@ var RockeyArm = /** @class */ (function () {
     if (ret !== 0) {
       return genResult(ret, 'failed', 'Read file.', null)
     }
-    return genResult(ret, 'success', 'Read file', null)
+    return genResult(ret, 'success', 'Read file', {data: buffer})
   }
 
   RockeyArm.prototype.DownloadExeFile = function () {}

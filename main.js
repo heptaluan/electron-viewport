@@ -1,10 +1,11 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
-const RockeyArm = require('./src/util/RockeyArm')
+const initDongle = require('./src/util/dongle')
 const { Menu } = require('electron')
 const { dialog } = require('electron')
-const dongle = new RockeyArm()
-const ret = dongle.Enum()
+const ret = initDongle()
+// console.log('test : ', ret)
+let count = 0
 server = require('./src/util/server')
 // 浏览器窗口.
 
@@ -24,7 +25,6 @@ function createWindow() {
     },
     backgroundColor: '#d3e4f5',
   })
-  console.log('p: ', app.getPath('appData'))
   // 这里要注意一下，这里是让浏览器窗口加载网页。
   // 如果是开发环境，则url为http://localhost:3000（package.json中配置）
   // 如果是生产环境，则url为build/index.html
@@ -58,19 +58,32 @@ app.on('ready', () => {
   }
 
   setInterval(() => {
-    const dongle = new RockeyArm()
-    const ret = dongle.Enum() 
+    const ret = initDongle(count)
+
     console.log(ret)
+    count += 1
+    console.log('count: ', count)
     if (ret.result !== 'success') {
       dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
+      server.on("request", onRequest);
+      server.on("close", function() {console.log("closed");});
       app.quit()
     }
-  }, 3000)
+  }, 1200000)
 })
+
+function onRequest(request, response) {
+  response.end(); //close the response
+  request.connection.end(); //close the socket
+  request.connection.destroy; //close it really
+  server.close(); //close the server
+}
+
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
-    server.close()
+    server.on("request", onRequest);
+    server.on("close", function() {console.log("closed");});
     app.quit()
   }
 })
