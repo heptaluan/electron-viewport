@@ -10,7 +10,7 @@ const App = () => {
   const [data, setData] = useState(null)
 
   return (
-    <div className="App">
+    <div className="App" data-testid="container">
       <main>
         {showViewer ? null : <StudyList setShowViewer={setShowViewer} setData={setData} />}
         {showViewer ? <Viewer data={data} setShowViewer={setShowViewer} /> : null}

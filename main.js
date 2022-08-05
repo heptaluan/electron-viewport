@@ -50,26 +50,26 @@ function createWindow() {
 }
 
 app.on('ready', () => {
-  if (ret.result === 'success') {
+  // if (ret.result === 'success') {
     createWindow()
     Menu.setApplicationMenu(null)
-  } else {
-    dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
-  }
+  // } else {
+    // dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
+  // }
 
-  setInterval(() => {
-    const ret = initDongle(count)
+  // setInterval(() => {
+  //   const ret = initDongle(count)
 
-    console.log(ret)
-    count += 1
-    console.log('count: ', count)
-    if (ret.result !== 'success') {
-      dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
-      server.on("request", onRequest);
-      server.on("close", function() {console.log("closed");});
-      app.quit()
-    }
-  }, 1200000)
+  //   console.log(ret)
+  //   count += 1
+  //   console.log('count: ', count)
+  //   if (ret.result !== 'success') {
+  //     dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
+  //     server.on("request", onRequest);
+  //     server.on("close", function() {console.log("closed");});
+  //     app.quit()
+  //   }
+  // }, 1200000)
 })
 
 function onRequest(request, response) {

@@ -25,7 +25,7 @@ const MiddleSidePanel = props => {
   }
 
   return (
-    <div className="middle-side-panel-box-wrap">
+    <div className="middle-side-panel-box-wrap" data-testid="middle-side-panel-box-wrap">
       <div className="middle-side-panel-box">
         <div className="basic-info-box">
           <div className="title">基本信息</div>
@@ -66,6 +66,7 @@ const MiddleSidePanel = props => {
                   key={item.noduleNum}
                   className={`table-item ${item.active ? 'item-active' : ''}`}
                   onClick={e => handleListClick(index, item.num)}
+                  data-testid="list-item"
                 >
                   <Checkbox onChange={e => props.onCheckChange(index, item.num)} checked={item.checked}>
                     <div className="num">{item.num}</div>

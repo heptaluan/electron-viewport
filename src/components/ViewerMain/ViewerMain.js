@@ -26,7 +26,7 @@ const ViewerMain = props => {
 }
 
 export const ViewerThumbnail = props => {
-  const { imageId, imageIdIndex } = props
+  const { imageId } = props
   const canvasRef = createRef()
   const [isLoading, setLoading] = useState(false)
   const [image, setImage] = useState({})
@@ -39,7 +39,6 @@ export const ViewerThumbnail = props => {
   }, [canvasRef, image, image.imageId])
 
   useEffect(() => {
-    // console.log('imageId：', imageId, ', image: ', image)
     if (!image.imageId || image.imageId !== imageId) {
       setLoading(true)
       showImageByDCMID(imageId)
@@ -52,18 +51,19 @@ export const ViewerThumbnail = props => {
     }
   }, [image.imageId, imageId])
 
-  // console.log('imageIdIndex: ', props.imageIdIndex)
-  // console.log('props:', props)
   return (
     <div>
-        <div className="image-thumbnail-canvas">
-            <canvas ref={canvasRef} style={{
-                minWidth: '100%',
-                minHeight: '100px',
-                flex: '1',
-            }} />
-            {isLoading && <div className="image-thumbnail-loading-indicator"></div>}
-        </div>
+      <div className="image-thumbnail-canvas">
+        <canvas
+          ref={canvasRef}
+          style={{
+            minWidth: '100%',
+            minHeight: '100px',
+            flex: '1',
+          }}
+        />
+        {isLoading && <div className="image-thumbnail-loading-indicator"></div>}
+      </div>
     </div>
   )
 }

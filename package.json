@@ -41,7 +41,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts --max_old_space_size=4096 build",
-    "test": "react-scripts test",
+    "test": "npx jest --coverage",
     "eject": "react-scripts eject",
     "electron:dev": "electron . dev",
     "electron": "electron .",
@@ -83,6 +83,11 @@
   },
   "devDependencies": {
     "electron": "^18.2.0",
-    "electron-builder": "^23.0.3"
+    "electron-builder": "^23.0.3",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "jest-enzyme": "^7.1.2",
+    "jest-environment-jsdom-fourteen": "1.0.1",
+    "identity-obj-proxy": "3.0.0"
   }
 }
