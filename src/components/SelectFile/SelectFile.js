@@ -261,7 +261,7 @@ const SelectFile = (props) => {
                         resolve(file)
                     } else {
                         resolve(null)
-                        console.log(file.name,' is not dicom')
+                        // console.log(file.name,' is not dicom')
                     }
                 }
             }
@@ -282,14 +282,19 @@ const SelectFile = (props) => {
     const createInstanceList = (list) => {
         const now = new Date().toLocaleString()
         queryInstanceData(res => {
-            console.log(res)
+            // console.log(res)
             const decodeFileList = []
             list.forEach(ele => {
                 const dicomDict = readFileInfo(ele)
                 const dict = dicomDict['dict']
                 const meta = dicomDict['meta']
                 const dicomTypeList = getDicomType()
-                const dicomType = dicomTypeList[meta['00020002']['Value'][0]].ciod
+                let dicomType = ''
+                try {
+                    dicomType = dicomTypeList[meta['00020002']['Value'][0]].ciod
+                } catch (e) {
+                    console.log('not CT file')
+                }
                 if ( dicomType !== 'CT Image') {
                     setImportFailed(prev => prev + 1)
                 } else {
@@ -322,7 +327,7 @@ const SelectFile = (props) => {
                 // Promise.all(innerPromises).then(innerRes=> {
                 //     console.log('finished')
                     DicomBuilder()
-                    console.log('list: ', patientList, ', d: ', studyList,', s: ', seriesList)
+                    // console.log('list: ', patientList, ', d: ', studyList,', s: ', seriesList)
                     if (patientList.length > 0 && studyList.length > 0 && seriesList.length > 0) {
                         insertData(SQLContainer.insertPatientSql, patientList);
                         insertData(SQLContainer.insertStudySql, studyList);
@@ -337,7 +342,7 @@ const SelectFile = (props) => {
                         props.setLoading(2)
                     } else {
                         message.warning(`所导入的DICOM文件不是有效的文件`)
-                        props.setLoading(0)
+                        props.setLoading(2)
                     }
                 // })
             })
@@ -374,7 +379,7 @@ const SelectFile = (props) => {
                         props.setLoading(0)
                     }
                 }).catch(reason => {
-                    console.log(reason)
+                    // console.log(reason)
                     props.setLoading(0)
                 })
             }
@@ -383,7 +388,7 @@ const SelectFile = (props) => {
             // 从DOM中移除input
             document.body.removeChild(inputObj)
         } catch (error) {
-            console.log(error)
+            // console.log(error)
             props.setLoading(0)
         }
     }

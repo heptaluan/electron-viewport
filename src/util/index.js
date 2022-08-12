@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx'
 import axios from "axios";
 
 export const readFileInfo = file => {
+  // console.log(window.fs)
   const arrayBuffer = window.fs.readFileSync(file.path).buffer
   const dicomDict = dcmjs.data.DicomMessage.readFile(arrayBuffer)
   return dicomDict
@@ -29,12 +30,12 @@ export const showImageByDCMID = dcmID => {
 
 export const showDicomImage = file => {
   const dcmID = cornerstoneWADOImageLoader.wadouri.fileManager.add(file)
-  console.log('dcmID: ', dcmID)
+  // console.log('dcmID: ', dcmID)
   const element = document.querySelector('.viewport-element')
   cornerstone.enable(element, { colormap: '' })
 
   return cornerstone.loadImage(dcmID).then(function (image) {
-    console.log(image)
+    // console.log(image)
     const viewport = cornerstone.getDefaultViewportForImage(element, image)
     cornerstone.displayImage(element, image, viewport)
     return image
@@ -56,7 +57,6 @@ export function dicomDateTimeToLocale(dateTime, divide) {
   } else {
     return 'Unknown'
   }
-
 }
 
 export function dicomTimeToLocale(dateTime) {
@@ -80,7 +80,7 @@ export const formatFile = async fileList => {
       const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(file)
       imagesIDConfig.push(imageId)
     } else {
-      console.log(fileList[i], ' not exists!!!')
+      // console.log(fileList[i], ' not exists!!!')
       return
     }
   }

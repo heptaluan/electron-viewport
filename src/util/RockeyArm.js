@@ -148,13 +148,13 @@ var RockeyArm = /** @class */ (function () {
     return genResult(ret, 'success', 'Reset state.', null)
   }
 
-  RockeyArm.prototype.Close = function () {
+  RockeyArm.prototype.Close = function (isPinVerified) {
     ret = this.libRockey.Dongle_Close(this.handle)
     if (ret !== 0) {
       return genResult(ret, 'failed', 'Close ROCKEY-ARM dongle.', null)
     }
     this.handle = null
-    return genResult(ret, 'success', 'Close ROCKEY-ARM', null)
+    return genResult(ret, 'success', 'Close ROCKEY-ARM', isPinVerified)
   }
 
   RockeyArm.prototype.GenRandom = function (len) {

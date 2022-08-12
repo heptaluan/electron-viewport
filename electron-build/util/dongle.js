@@ -1,8 +1,8 @@
 
-const RockeyArm = require('./RockeyArm')
+const RockeyArm = require('../RockeyArm')
 
 const initDongle = () => {
-  const dongle = new RockeyArm('./dongle.dll')
+  const dongle = new RockeyArm('../dongle.dll')
   let ret = dongle.Enum()
   // console.log('ret Info: ',ret)
   let i = 0

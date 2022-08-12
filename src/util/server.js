@@ -23,7 +23,7 @@ const logger = winston.createLogger({
 // 如果不存在则创建
 if (!resourceExists) {
     fs.mkdirSync(resourceDir)
-    console.log('resourceDir: ', resourceDir)
+    // console.log('resourceDir: ', resourceDir)
 }
 
 const server = http.createServer(async (req, res) => {
@@ -85,24 +85,22 @@ const server = http.createServer(async (req, res) => {
 if (!fs.existsSync(filePath)) {
     fs.openSync(filePath, 'w')
     server.listen(PORT, () => {
-        console.log(`server started on port: ${PORT}`);
+        // console.log(`server started on port: ${PORT}`);
     });
 } else {
     server.listen(PORT, () => {
-        console.log(`server started on port: ${PORT}`);
+        // console.log(`server started on port: ${PORT}`);
     });
 }
 
 
-const a = new Date()
 const sqlite3 = new sqlite.Database(filePath)
-console.log('server: ',a.getTime(), ', db:',sqlite3)
 
 const createTable = function (sql, callback) {
     sqlite3.serialize(function () {
         sqlite3.run(sql, function (err) {
             if (null != err) {
-                console.log('ERR:', err)
+                // console.log('ERR:', err)
                 return
             }
             if (callback) {
@@ -115,8 +113,8 @@ const createTable = function (sql, callback) {
 const queryData = function (sql, callback) {
     sqlite3.all(sql, function (err, rows) {
         if (null != err) {
-            console.log('ERR server:', err)
-            console.log('rows',rows)
+            // console.log('ERR server:', err)
+            // console.log('rows',rows)
             if (!rows || rows.length <= 0) {
                 if (callback) {
                     callback([])
@@ -136,7 +134,7 @@ const executeSql = function (sql) {
     sqlite3.run(sql, function (err) {
         if (null != err) {
             // DB.printErrorInfo(err);
-            console.log('ERR:', err)
+            // console.log('ERR:', err)
         }
     })
 };

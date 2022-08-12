@@ -6,8 +6,7 @@ const { dialog } = require('electron')
 const ret = initDongle()
 // console.log('test : ', ret)
 let count = 0
-server = require('./src/util/server')
-// 浏览器窗口.
+
 
 const url = require('url')
 let mainWindow
@@ -43,34 +42,11 @@ function createWindow() {
   // if (startUrl.startsWith('http')) {
   //   mainWindow.webContents.openDevTools()
   // }
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   // mainWindow.on('closed', function () {
   //   mainWindow = null
   // })
 }
-
-app.on('ready', () => {
-  // if (ret.result === 'success') {
-    createWindow()
-    Menu.setApplicationMenu(null)
-  // } else {
-    // dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
-  // }
-
-  // setInterval(() => {
-  //   const ret = initDongle(count)
-
-  //   console.log(ret)
-  //   count += 1
-  //   console.log('count: ', count)
-  //   if (ret.result !== 'success') {
-  //     dialog.showErrorBox('未授权', '请插入正确的加密狗以后在使用本软件。')
-  //     server.on("request", onRequest);
-  //     server.on("close", function() {console.log("closed");});
-  //     app.quit()
-  //   }
-  // }, 1200000)
-})
 
 function onRequest(request, response) {
   response.end(); //close the response
@@ -79,17 +55,73 @@ function onRequest(request, response) {
   server.close(); //close the server
 }
 
+function closeApplication() {
+  server.on("request", onRequest);
+  server.on("close", function() {console.log("closed");});
+  app.quit()
+}
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
-    server.on("request", onRequest);
-    server.on("close", function() {console.log("closed");});
+const singleInstanceLock = app.requestSingleInstanceLock();
+if (!singleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, argv) => {
+    if (win) {
+      if (win.isMinimized()) {
+        win.restore()
+      }
+      win.focus()
+    }
+  });
+
+  try {
+    server = require("./src/util/server")
+    goOn = true
+  } catch (e) {
+    dialog.showErrorBox('打开方式不正确', '必须由软件中导入DICOM文件')
     app.quit()
   }
-})
 
-app.on('activate', function () {
-  if (mainWindow === null) {
-    createWindow()
+  if (goOn) {
+    // Electron 会在初始化后并准备
+    // 创建浏览器窗口时，调用这个函数。
+    // 部分 API 在 ready 事件触发后才能使用，同时隐藏菜单栏
+    app.on('ready', (event) => {
+      console.log(ret)
+      if (ret.param && ret.param.result === 'success') {
+        createWindow()
+        Menu.setApplicationMenu(null)
+
+        const timer = setInterval(() => {
+          const ret = initDongle()
+          // console.log('gg: ', ret)
+          count += 1
+          // console.log('count: ', count)
+          if (!ret.param || ret.param.result !== 'success') {
+            dialog.showErrorBox('未授权', '请插入正确的加密狗以后再使用本软件。')
+            clearInterval(timer)
+            server.on("request", onRequest);
+            server.on("close", function() {console.log("closed");});
+            app.quit()
+          }
+        }, 10* 1000)
+      } else {
+        dialog.showErrorBox('未授权', '请插入正确的加密狗再使用本软件。')
+        closeApplication()
+      }
+    })
+
+    // 当全部窗口关闭时退出。
+    app.on('window-all-closed', () => {
+      // 在 macOS 上，除非用户用 Cmd + Q 确定地退出，
+      // 否则绝大部分应用及其菜单栏会保持激活。
+      if (process.platform !== 'darwin') {
+        closeApplication()
+      }
+    })
+
+    // 在这个文件中，你可以续写应用剩下主进程代码。
+    // 也可以拆分成几个文件，然后用 require 导入。
+
   }
-})
+}

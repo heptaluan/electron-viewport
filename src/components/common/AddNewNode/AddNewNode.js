@@ -28,7 +28,7 @@ const AddNewNode = props => {
       </div>
 
       {props.toolList?.map((item, index) => (
-        <div className="add-box" key={item.uuid}>
+        <div className="add-box" key={item.uuid} data-testid="nodeList">
           <div className="list-header">结节信息</div>
           <div className="list">
             <span className="list-title">肺：</span>

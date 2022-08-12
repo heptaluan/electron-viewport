@@ -17,7 +17,6 @@ const ModalContent = (props) => {
         dcmHTML : null
     })
     // console.log('props: ', props.globalData)
-
     useEffect(() => {
         let selectedPath = null
         let info = null

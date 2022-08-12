@@ -6,7 +6,7 @@ const winston = require('winston')
 const backupTimer = require('./config.json')
 const rootPath = path.join(__dirname, 'src')
 
-console.log('rootPath: ',rootPath)
+// console.log('rootPath: ',rootPath)
 
 // console.log('rootPath: ',rootPath)
 window.addEventListener('DOMContentLoaded', () => {

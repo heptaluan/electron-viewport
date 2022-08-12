@@ -46,7 +46,7 @@ export const ViewerThumbnail = props => {
           setImage(res)
         })
         .catch(err => {
-          console.log('err: ', err)
+          // console.log('err: ', err)
         })
     }
   }, [image.imageId, imageId])

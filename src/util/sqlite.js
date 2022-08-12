@@ -5,18 +5,18 @@ const dbSlot = 'resources/'
 const backup = 'backup/'
 const backupTimer = window.backupTimer
 
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-      winston.format.timestamp(),
-      winston.format.printf(({ level, message, timestamp }) => {
-        return `${timestamp} ${level}: ${message}`;
-      })
-  ),
-  transports: [
-    new winston.transports.File({ filename: 'logger.log' }),
-  ],
-});
+// const logger = winston.createLogger({
+//   level: 'info',
+//   format: winston.format.combine(
+//       winston.format.timestamp(),
+//       winston.format.printf(({ level, message, timestamp }) => {
+//         return `${timestamp} ${level}: ${message}`;
+//       })
+//   ),
+//   transports: [
+//     new winston.transports.File({ filename: 'logger.log' }),
+//   ],
+// });
 
 const resourceDir = path.resolve(dbSlot)
 const dbDir = path.resolve(dbSlot + 'db')
@@ -66,7 +66,7 @@ const backupDBFile = () => {
   fs.copyFile(filePath, destination, (err) => {
     if (err) throw err;
     console.log(filePath,' was copied to ', destination);
-    logger.info(filePath+` was copied to `+ destination)
+    // logger.info(filePath+` was copied to `+ destination)
   });
 }
 
@@ -214,42 +214,42 @@ export const removeAllDuplicated = patientCallback => {
 
 export const queryInstanceData = (DBFunction, instanceNumber, seriesInstanceUID) => {
   const sql = (instanceNumber && seriesInstanceUID) ? ` where instanceNumber ='${instanceNumber}' and seriesInstanceUID = '${seriesInstanceUID}'` : ''
-  logger.info(`Query Instance data` + sql)
+  // logger.info(`Query Instance data` + sql)
   queryData(SQLContainer.queryInstanceSql + sql, DBFunction)
 }
 export const queryInstanceByStudyID = ( studyID, DBFunction) => {
   const sql = ` where studyID ='${studyID}'`
-  logger.info(`Query Instance data that studyID ='${studyID}'`)
+  // logger.info(`Query Instance data that studyID ='${studyID}'`)
   queryData(SQLContainer.queryInstanceSql + sql, DBFunction)
 }
 
 export const queryPatientData = (DBFunction, patientID) => {
   const sql = patientID ? ` where patientID ='${patientID}'` : ''
-  logger.info(`Query Patient data` + sql)
+  // logger.info(`Query Patient data` + sql)
   queryData(SQLContainer.queryPatientSql + sql, DBFunction)
 }
 
 export const queryStudyByPatientID = (patientID, DBFunction) => {
   const sql = ` where patientID ='${patientID}'`
-  logger.info(`Query Study data that patientID ='${patientID}'`)
+  // logger.info(`Query Study data that patientID ='${patientID}'`)
   queryData(SQLContainer.queryStudySql + sql, DBFunction)
 }
 
 export const querySeriesByStudyID = (studyID, DBFunction) => {
   const sql = studyID ? ` where studyID = '${studyID}'` : ''
-  logger.info(`Query Series data` + sql )
+  // logger.info(`Query Series data` + sql )
   queryData(SQLContainer.querySeriesSql + sql, DBFunction)
 }
 
 export const queryNodeList = (patientID, seriesNo, callback) => {
   const sql = ` where patientID = '${patientID}' and seriesNo = '${seriesNo}'`
-  logger.info(`Query NodeList data that patientID = '${patientID}' and seriesNo = '${seriesNo}'`)
+  // logger.info(`Query NodeList data that patientID = '${patientID}' and seriesNo = '${seriesNo}'`)
   queryData(SQLContainer.queryNodeListSql + sql, callback)
 }
 
 export const queryAllNodeList = (patientID, callback) => {
   const sql = ` where patientID = '${patientID}'`
-  logger.info(`Query NodeList data that patientID = '${patientID}'`)
+  // logger.info(`Query NodeList data that patientID = '${patientID}'`)
   queryData(SQLContainer.queryNodeListSql + sql, callback)
 }
 
@@ -260,14 +260,14 @@ export const updateSeriesSuggest = (suggest, studyId, seriesNo, callback) => {
 
 export const querySeriesSuggest = (studyId, seriesNo, callback) => {
   const sql = ` where studyID = '${studyId}' and seriesNo = '${seriesNo}'`
-  logger.info(`Query SeriesSuggest that studyID = '${studyId}' and seriesNo = '${seriesNo}'`)
+  // logger.info(`Query SeriesSuggest that studyID = '${studyId}' and seriesNo = '${seriesNo}'`)
   queryData(SQLContainer.querySeriesSql + sql, callback)
 }
 
 export const queryPatientList = (value, callback) => {
   const sql = ` select * from dicom_patient where patientName like '%${value}%' or patientGender like '%${value}%' or patientID like '%${value}%' or patientBirthday like '%${value}%' or acquisitionDate like '%${value}%' or institution like '%${value}%' or deviceManufacturer like '%${value}%' or deviceModelName like '%${value}%' or addTime like '%${value}%' or studyNum like '%${value}%'
   `
-  logger.info(`Query PatientList from search input box by input value equal '${value}'`)
+  // logger.info(`Query PatientList from search input box by input value equal '${value}'`)
   queryData(sql, callback)
 }
 

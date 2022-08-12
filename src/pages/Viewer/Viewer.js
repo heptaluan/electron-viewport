@@ -551,7 +551,7 @@ const Viewer = props => {
       // console.log('res: ', res)
       message.success(`删除结节成功`)
     }).catch(err => {
-      console.log(err)
+      // console.log(err)
     })
 
     setTimeout(() => {
@@ -593,9 +593,9 @@ const Viewer = props => {
     }
     updateSuggestAPI({...data}).then(res => {
       message.success(`结节总结信息添加成功 `)
-      console.log('res: ', res)
+      // console.log('res: ', res)
     }).catch(err => {
-      console.log(err)
+      // console.log(err)
     })
   }
 

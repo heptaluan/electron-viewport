@@ -91,6 +91,7 @@ const listColumns = [
     render: (txt) => <span>{txt.split('_')[0]}</span>,
   },
   {
+
     title: '序列描述',
     dataIndex: 'seriesDescription',
   },
@@ -133,14 +134,14 @@ const StudyList = props => {
         getDicomFromDB(res["data"])
         setLoading(0)
       }).catch(err => {
-        console.log(err)
+        // console.log(err)
       })
     }
 
     createSeriesAPI().then(res => {
       // console.log('res: ', res)
     }).catch(err => {
-      console.log(err)
+      // console.log(err)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -241,7 +242,7 @@ const StudyList = props => {
     Promise.all(promises).then(res => {
       // check if file is inexistent when path is exists in DB
       if (res.findIndex(x => x == undefined) >= 0) {
-        console.log('no file be found')
+        // console.log('no file be found')
         message.error("此序列文件缺失，请检查DICOM文件是否存在")
       } else {
         // set the dcm image as cover
@@ -308,7 +309,7 @@ const StudyList = props => {
       setSearchData('')
     }
     queryPatientList(type === 'reset' ? '' : searchData, res => {
-      console.log(res)
+      // console.log(res)
       getDicomFromDB(res)
       getStudyFromDB([])
       getSeriesFromDB([])
@@ -360,18 +361,18 @@ const StudyList = props => {
               <Button onClick={e=> handleSearch('reset')} type="primary">
                 重置
               </Button>
-              <Button onClick={e => deleteTableSql('dicom_patient')} type="primary">
-                      删除 patient
-                    </Button>
-                    <Button onClick={e => deleteTableSql('dicom_study')} type="primary">
-                      删除 study
-                    </Button>
-                    <Button onClick={e => deleteTableSql('dicom_series')} type="primary">
-                      删除 series
-                    </Button>
-                    <Button onClick={e => deleteTableSql('dicom_instance')} type="primary">
-                      删除 instance
-                    </Button>
+              {/*<Button onClick={e => deleteTableSql('dicom_patient')} type="primary">*/}
+              {/*        删除 patient*/}
+              {/*      </Button>*/}
+              {/*      <Button onClick={e => deleteTableSql('dicom_study')} type="primary">*/}
+              {/*        删除 study*/}
+              {/*      </Button>*/}
+              {/*      <Button onClick={e => deleteTableSql('dicom_series')} type="primary">*/}
+              {/*        删除 series*/}
+              {/*      </Button>*/}
+              {/*      <Button onClick={e => deleteTableSql('dicom_instance')} type="primary">*/}
+              {/*        删除 instance*/}
+              {/*      </Button>*/}
               {/*<Button onClick={e => setLoading(1)} type="primary">*/}
               {/*  loading*/}
               {/*</Button>*/}

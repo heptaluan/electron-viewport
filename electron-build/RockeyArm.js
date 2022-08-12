@@ -6,20 +6,96 @@ const ref = require('ref-napi')
 const refArray = require('ref-array-napi')
 const StructType = require('ref-struct-napi')
 
+function genResult(retcode, info, msg, returnParam) {
+  return { errorCode: retcode, result: info, message: msg, param: returnParam }
+}
+
+function genDongleInfoItem(versionL, versionR, type, userId, hardwareIdL, hardwareIdR, productId, isMother, devType) {
+  var typeList = { 0: 'ROCKEY-ARM TIME', 2: 'StoreROCKEY-ARM', 255: 'ROCKEY-ARM' }
+  var motherTypeList = { 0: 'New Dongle', 1: 'Master Dongle', 2: 'User Dongle' }
+  var devTypeList = { 0: 'HID Device', 1: 'Smart Card Device' }
+  return {
+    version: versionR.toString() + '.' + versionL.toString(),
+    type: typeList[type],
+    birthday: '',
+    userId: userId.toString(16).toUpperCase(),
+    hardwareId: hardwareIdR.toString(16).toUpperCase() + hardwareIdL.toString(16).toUpperCase(),
+    productId: productId.toString(16).toUpperCase(),
+    isMother: motherTypeList[isMother],
+    devType: devTypeList[devType],
+  }
+}
+
+function structToByteArray(struct) {
+  var i = 0
+  var buffer = struct.ref()
+  var byteArray = new ptrByte(buffer.length)
+  for (i = 0; i < buffer.length; i++) {
+    byteArray[i] = buffer[i]
+  }
+  return byteArray
+}
+
+function getByteFromByteArray(buffer) {
+  var i = 0
+  var str = ''
+  var s = ''
+  for (i = 0; i < buffer.length; i++) {
+    s = buffer[i].toString(16).toUpperCase()
+    if (s.length === 1) {
+      //转成16进制后补零
+      s = '0' + s
+    }
+    str = str + s
+  }
+  return str
+}
+
+function getByteArrayFromString(str, flag) {
+  var i = 0
+  var len
+  var byte = stringToByte(str)
+  if (flag === undefined) {
+    len = byte.length
+  } else {
+    len = byte.length + 1
+  }
+  var byteArray = new ptrByte(len)
+  byteArray[len - 1] = 0
+  for (i = 0; i < len; i++) {
+    byteArray[i] = byte[i]
+  }
+  return byteArray
+}
+
+function getByteArrayFromBytes(bytes) {
+  var byteArray = new ptrByte(bytes.length)
+  for (var i = 0; i < bytes.length; i++) {
+    byteArray[i] = bytes[i]
+  }
+  return byteArray
+}
+
+function getFileAttr(fileType, fileAttr) {
+  var dataAttr = new dataFileAttr(1)
+  if (fileType === 1) {
+    dataAttr.m_Size = fileAttr.size
+    dataAttr.m_Read_Priv = fileAttr.readPriv
+    dataAttr.m_Write_Priv = fileAttr.writePriv
+    return dataAttr
+  }
+}
+
 var RockeyArm = /** @class */ (function () {
   //-class start
   var ret = 0
   function RockeyArm() {
+    console.log(__dirname)
     this.productId = 'FFFFFFFF'
     this.handle = 0
     this.result = 0
     this.handle = null
-    if (platform === 'win32' && arch === 'x64') {
-      this.libFilePath = 'resources/dongle.dll'
-    } else {
-      this.libFilePath = ''
-    }
-    this.libRockey = new ffi_Library.Library(this.libFilePath, rockeyInterface)
+    this.libRockey = new ffi_Library.Library('resources//dongle.dll', rockeyInterface)
   }
 
   RockeyArm.prototype.Enum = function () {
@@ -39,15 +115,15 @@ var RockeyArm = /** @class */ (function () {
     var item
     for (i = 0; i < piCount[0]; i++) {
       item = genDongleInfoItem(
-        DongleList[i].m_VerL,
-        DongleList[i].m_VerR,
-        DongleList[i].m_Type,
-        DongleList[i].m_UserID,
-        DongleList[i].m_HIDL,
-        DongleList[i].m_HIDR,
-        DongleList[i].m_PID,
-        DongleList[i].m_IsMother,
-        DongleList[i].m_DevType
+          DongleList[i].m_VerL,
+          DongleList[i].m_VerR,
+          DongleList[i].m_Type,
+          DongleList[i].m_UserID,
+          DongleList[i].m_HIDL,
+          DongleList[i].m_HIDR,
+          DongleList[i].m_PID,
+          DongleList[i].m_IsMother,
+          DongleList[i].m_DevType
       )
       list.push(JSON.stringify(item))
     }
@@ -72,13 +148,13 @@ var RockeyArm = /** @class */ (function () {
     return genResult(ret, 'success', 'Reset state.', null)
   }
 
-  RockeyArm.prototype.Close = function () {
+  RockeyArm.prototype.Close = function (isPinVerified) {
     ret = this.libRockey.Dongle_Close(this.handle)
     if (ret !== 0) {
       return genResult(ret, 'failed', 'Close ROCKEY-ARM dongle.', null)
     }
     this.handle = null
-    return genResult(ret, 'success', 'Close ROCKEY-ARM', null)
+    return genResult(ret, 'success', 'Close ROCKEY-ARM', isPinVerified)
   }
 
   RockeyArm.prototype.GenRandom = function (len) {
@@ -139,7 +215,7 @@ var RockeyArm = /** @class */ (function () {
     if (ret !== 0) {
       return genResult(ret, 'failed', 'Read file.', null)
     }
-    return genResult(ret, 'success', 'Read file', null)
+    return genResult(ret, 'success', 'Read file', {data: buffer})
   }
 
   RockeyArm.prototype.DownloadExeFile = function () {}
@@ -346,13 +422,13 @@ var RockeyArm = /** @class */ (function () {
     var ptrIntOutDataLen = new ptrInt(1)
     ptrIntOutDataLen[0] = 256
     ret = this.libRockey.Dongle_RsaPri(
-      this.handle,
-      priFileId,
-      flag,
-      byteInData,
-      inDataLen,
-      byteOutData,
-      ptrIntOutDataLen
+        this.handle,
+        priFileId,
+        flag,
+        byteInData,
+        inDataLen,
+        byteOutData,
+        ptrIntOutDataLen
     )
     if (ret !== 0) {
       return genResult(ret, 'failed', 'Calculate RSA private key.', null)
@@ -370,13 +446,13 @@ var RockeyArm = /** @class */ (function () {
     var ptrIntOutDataLen = new ptrInt(1)
     ptrIntOutDataLen[0] = 256
     ret = this.libRockey.Dongle_RsaPub(
-      this.handle,
-      flag,
-      bytePubKey,
-      byteInData,
-      inDataLen,
-      byteOutData,
-      ptrIntOutDataLen
+        this.handle,
+        flag,
+        bytePubKey,
+        byteInData,
+        inDataLen,
+        byteOutData,
+        ptrIntOutDataLen
     )
     if (ret !== 0) {
       return genResult(ret, 'failed', 'Calculate RSA public key.', null)
@@ -530,96 +606,16 @@ var RockeyArm = /** @class */ (function () {
   return RockeyArm
 })() //-class end
 
-function genResult(retcode, info, msg, returnParam) {
-  return { errorCode: retcode, result: info, message: msg, param: returnParam }
-}
-
-function genDongleInfoItem(versionL, versionR, type, userId, hardwareIdL, hardwareIdR, productId, isMother, devType) {
-  var typeList = { 0: 'ROCKEY-ARM TIME', 2: 'StoreROCKEY-ARM', 255: 'ROCKEY-ARM' }
-  var motherTypeList = { 0: 'New Dongle', 1: 'Master Dongle', 2: 'User Dongle' }
-  var devTypeList = { 0: 'HID Device', 1: 'Smart Card Device' }
-  return {
-    version: versionR.toString() + '.' + versionL.toString(),
-    type: typeList[type],
-    birthday: '',
-    userId: userId.toString(16).toUpperCase(),
-    hardwareId: hardwareIdR.toString(16).toUpperCase() + hardwareIdL.toString(16).toUpperCase(),
-    productId: productId.toString(16).toUpperCase(),
-    isMother: motherTypeList[isMother],
-    devType: devTypeList[devType],
-  }
-}
-
-function structToByteArray(struct) {
-  var i = 0
-  var buffer = struct.ref()
-  var byteArray = new ptrByte(buffer.length)
-  for (i = 0; i < buffer.length; i++) {
-    byteArray[i] = buffer[i]
-  }
-  return byteArray
-}
-
-function getByteFromByteArray(buffer) {
-  var i = 0
-  var str = ''
-  var s = ''
-  for (i = 0; i < buffer.length; i++) {
-    s = buffer[i].toString(16).toUpperCase()
-    if (s.length === 1) {
-      //转成16进制后补零
-      s = '0' + s
-    }
-    str = str + s
-  }
-  return str
-}
-
-function getByteArrayFromString(str, flag) {
-  var i = 0
-  var len
-  var byte = stringToByte(str)
-  if (flag === undefined) {
-    len = byte.length
-  } else {
-    len = byte.length + 1
-  }
-  var byteArray = new ptrByte(len)
-  byteArray[len - 1] = 0
-  for (i = 0; i < len; i++) {
-    byteArray[i] = byte[i]
-  }
-  return byteArray
-}
-
-function getByteArrayFromBytes(bytes) {
-  var byteArray = new ptrByte(bytes.length)
-  for (var i = 0; i < bytes.length; i++) {
-    byteArray[i] = bytes[i]
-  }
-  return byteArray
-}
-
-function getFileAttr(fileType, fileAttr) {
-  var dataAttr = new dataFileAttr(1)
-  if (fileType === 1) {
-    dataAttr.m_Size = fileAttr.size
-    dataAttr.m_Read_Priv = fileAttr.readPriv
-    dataAttr.m_Write_Priv = fileAttr.writePriv
-    return dataAttr
-  }
-}
-
 // [0x31,0x32,0x33,0x34,0x35,0x36]转'313233343536'
 function byteToHexString(arr) {
   if (typeof arr === 'string') {
     return arr
   }
   var str = '',
-    _arr = arr
+      _arr = arr
   for (var i = 0; i < _arr.length; i++) {
     var one = _arr[i].toString(2),
-      v = one.match(/^1+?(?=0)/)
+        v = one.match(/^1+?(?=0)/)
     if (v && one.length == 8) {
       var bytesLength = v[0].length
       var store = _arr[i].toString(2).slice(7 - bytesLength)
@@ -671,11 +667,11 @@ function hexToBytes(hex) {
 //'123456'转为'313233343536'
 function stringToHex(str) {
   return str
-    .split('')
-    .map(function (c) {
-      return ('0' + c.charCodeAt(0).toString(16)).slice(-2)
-    })
-    .join('')
+      .split('')
+      .map(function (c) {
+        return ('0' + c.charCodeAt(0).toString(16)).slice(-2)
+      })
+      .join('')
 }
 
 //字符串表示的16进制string转换成字节数组

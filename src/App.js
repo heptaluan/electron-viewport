@@ -4,6 +4,12 @@ import './assets/scss/reset.scss'
 import './assets/scss/common.scss'
 import Viewer from './pages/Viewer/Viewer'
 import StudyList from './pages/StudyList/StudyList'
+import { Modal } from 'antd'
+
+const { confirm } = Modal
+
+window.Modal = Modal
+window.confirm = confirm
 
 const App = () => {
   const [showViewer, setShowViewer] = useState(false)
