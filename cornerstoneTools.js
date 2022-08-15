@@ -17676,35 +17676,34 @@ function (_BaseTool) {
   _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1___default()(EraserTool, [{
     key: "_deleteAllNearbyTools",
     value: function _deleteAllNearbyTools(evt) {
-      window.confirm({
-        title: '标注删除',
-        content: '是否删除选定的标注？',
-        okText: '确定',
-        cancelText: '取消',
-        onOk() {
-          var coords = evt.detail.currentPoints.canvas;
-          var element = evt.detail.element;
-          _store_index_js__WEBPACK_IMPORTED_MODULE_9__["state"].tools.forEach(function (tool) {
-            var toolState = Object(_stateManagement_toolState_js__WEBPACK_IMPORTED_MODULE_8__["getToolState"])(element, tool.name);
+      var coords = evt.detail.currentPoints.canvas;
+      var element = evt.detail.element;
+      _store_index_js__WEBPACK_IMPORTED_MODULE_9__["state"].tools.forEach(function (tool) {
+        var toolState = Object(_stateManagement_toolState_js__WEBPACK_IMPORTED_MODULE_8__["getToolState"])(element, tool.name);
 
-            if (toolState) {
-              // Modifying in a foreach? Probably not ideal
-              toolState.data.forEach(function (data) {
-                if (typeof tool.pointNearTool === 'function' && tool.pointNearTool(element, data, coords)) {
+        if (toolState) {
+          // Modifying in a foreach? Probably not ideal
+          toolState.data.forEach(function (data) {
+            if (typeof tool.pointNearTool === 'function' && tool.pointNearTool(element, data, coords)) {
+              window.confirm({
+                title: '标注删除',
+                content: '是否删除选定的标注？',
+                okText: '确定',
+                cancelText: '取消',
+                onOk() {
                   Object(_stateManagement_toolState_js__WEBPACK_IMPORTED_MODULE_8__["removeToolState"])(element, tool.name, data);
                   _externalModules_js__WEBPACK_IMPORTED_MODULE_6__["default"].cornerstone.updateImage(element);
-                }
+                },
+                onCancel() {
+                  return false
+                },
               });
             }
           });
-          window.Modal.destroyAll()
-          var consumeEvent = true;
-          return consumeEvent;
-        },
-        onCancel() {
-          return false
-        },
+        }
       });
+      var consumeEvent = true;
+      return consumeEvent;
     }
   }]);
 
